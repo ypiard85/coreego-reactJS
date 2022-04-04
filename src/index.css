@@ -1,13 +1,44 @@
-body {
+:root{
+  --blue: #005998;
+  --red: #CE293B;
+  --light: rgb(255, 255, 255);
+  --gray: rgba(100, 100, 100, 0.76);
+}
+
+*{
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-decoration: none;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+header{
+  background-color: var(--light)!important;
+}
+
+header svg{
+  font-size: 2.5rem!important;
+}
+
+.card__lieux{
+  position: relative;
+}
+
+.card__lieux .link__card{
+  position: absolute;
+  top: 0; bottom:0; left:0; right: 0;
+  width: 100%;
+}
+
+.card__lieux .title_card{
+  font-weight: bold;
+}
+
+@media screen and (max-width: 900px){
+  .homeSwiper.swiper{
+    height: 250px!important;
+  }
 }
