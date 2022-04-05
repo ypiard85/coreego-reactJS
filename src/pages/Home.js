@@ -17,6 +17,7 @@ function SwiperHome() {
       navigation={false}
       modules={[Autoplay, EffectFade]}
       effect={"fade"}
+      loops={true}
       autoplay={{
         delay: 3500,
       }}

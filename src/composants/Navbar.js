@@ -48,7 +48,7 @@ const ResponsiveAppBar = () => {
 
   return (
     <div>
-    <AppBar position="static" >
+    <AppBar position="sticky" sx={{ top: '200px' }} >
       <Container>
         <Toolbar disableGutters>
           <Typography

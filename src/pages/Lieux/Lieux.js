@@ -1,62 +1,81 @@
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect } from "react";
 import { db, storage } from "../../backend/config.js";
 import { ref, getDownloadURL } from "firebase/storage";
 import { collection, getDocs } from "firebase/firestore";
 import Container from "@mui/material/Container";
 import Card from "@mui/material/Card";
-import Grid from '@mui/material/Grid';
+import Grid from "@mui/material/Grid";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import { CardActionArea } from "@mui/material";
-import {Link} from 'react-router-dom';
-import AddLocationIcon from '@mui/icons-material/AddLocation';
-import Badge from '@mui/material/Badge';
+import { Link } from "react-router-dom";
+import AddLocationIcon from "@mui/icons-material/AddLocation";
 
 function Cards(props) {
-  const {lieu, cats, citie, images} = props
+  const { lieu, cats, citie, images } = props;
   const [url, setUrl] = useState();
 
-   useEffect(()=>{
-    const getImage =  (id) => {
-      const getRef = ref(storage, 'lieux/' + id )
-        getDownloadURL(getRef).then(x => {
-          setUrl(x)
-      })
-    }
-    getImage(images)
-   }, [])
+  //Récupération des images dans le storage
+  useEffect(() => {
+    const getImage = (id) => {
+      const getRef = ref(storage, "lieux/" + id);
+      getDownloadURL(getRef).then((x) => {
+        setUrl(x);
+      });
+    };
+    getImage(images);
+  }, []);
 
   return (
-
-    <Grid item md={4} xs={6} >
-    <Card className="card__lieux">
-      <Typography varaint="p" sx={{ padding: '3px 5px', pointerEvents: 'none', fontWeight: "bold", position: 'absolute', top: '0', zIndex: '10', backgroundColor: "#005998" }} color="white" >
-              {cats.map(c => {
-                return c.names[lieu.categorie_id]
-              })}
+    <Grid item md={4} xs={6}>
+      <Card className="card__lieux">
+        <Typography
+          varaint="p"
+          sx={{
+            padding: "3px 5px",
+            pointerEvents: "none",
+            fontWeight: "bold",
+            position: "absolute",
+            top: "0",
+            zIndex: "10",
+            backgroundColor: "#005998",
+          }}
+          color="white"
+        >
+          {cats.map((c) => {
+            return c.names[lieu.categorie_id];
+          })}
         </Typography>
-      <CardActionArea>
-        <CardMedia
-          component="img"
-          height="140"
-          image={url}
-          alt="green iguana"
+        <CardActionArea>
+          <CardMedia
+            component="img"
+            height="140"
+            image={url}
+            alt="green iguana"
           />
-        <CardContent>
-          <Typography sx={{ fontWeight: 'bold',  color: '#005998' }} variant="h6" component="div">
-            {lieu.title}
-          </Typography>
-          <Typography sx={{ display: 'flex', alignItems: 'center', fontWeight: 'bold' }}  variant="p" component="p">
-            <AddLocationIcon sx={{ color: '#CE293B' }} />
-            {citie.map((e) => {
-              return e.cities[lieu.citie_id];
-            })}
-          </Typography>
-        </CardContent>
-      </CardActionArea>
-      <Link to={'/lieu/'+ lieu.id} className="link__card" ></Link>
-    </Card>
+          <CardContent>
+            <Typography
+              sx={{ fontWeight: "bold", color: "#005998" }}
+              variant="h6"
+              component="div"
+            >
+              {lieu.title}
+            </Typography>
+            <Typography
+              sx={{ display: "flex", alignItems: "center", fontWeight: "bold" }}
+              variant="p"
+              component="p"
+            >
+              <AddLocationIcon sx={{ color: "#CE293B" }} />
+              {citie.map((e) => {
+                return e.cities[lieu.citie_id];
+              })}
+            </Typography>
+          </CardContent>
+        </CardActionArea>
+        <Link to={"/lieu/" + lieu.id} className="link__card"></Link>
+      </Card>
     </Grid>
   );
 }
@@ -72,7 +91,7 @@ function List() {
     getDocs(lieuxCollection)
       .then((snap) => {
         snap.forEach((doc) => {
-            lieux.push({...doc.data(), id: doc.id});
+          lieux.push({ ...doc.data(), id: doc.id });
         });
       })
       .catch((erreur) => console.log(erreur));
@@ -98,15 +117,20 @@ function List() {
     });
   }, []);
 
-
-    return (
+  return (
     <Grid container spacing={2}>
-        {lieux.map((lieu, index) => {
-          return <Cards lieu={lieu} key={index} citie={cities} images={lieu.images[0]} cats={cats} />
-        })}
+      {lieux.map((lieu, index) => {
+        return (
+          <Cards
+            lieu={lieu}
+            key={index}
+            citie={cities}
+            images={lieu.images[0]}
+            cats={cats}
+          />
+        );
+      })}
     </Grid>
-
-
   );
 }
 
