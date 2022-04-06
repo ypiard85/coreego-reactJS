@@ -25,7 +25,16 @@ const pages = [
   },
 ];
 
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
+const settings = [
+  {
+    name: "Créer un compte",
+    path: '/register'
+  },
+  {
+    name: "Connexion",
+    path: '/register'
+  }
+];
 
 const ResponsiveAppBar = () => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -115,7 +124,6 @@ const ResponsiveAppBar = () => {
               sx={{ my: 2, color: 'white', display: 'block' }}
               >
                 <Link style={{ color: 'black' }}to={page.path} > {page.name}</Link>
-
               </Button>
             ))}
           </Box>
@@ -142,9 +150,11 @@ const ResponsiveAppBar = () => {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
               >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
+              {settings.map((s) => (
+                <MenuItem key={s.name} onClick={handleCloseNavMenu}>
+                  <Typography textAlign="center" >
+                      <Link style={{ color: 'black' }} to={s.path} >{s.name}</Link>
+                    </Typography>
                 </MenuItem>
               ))}
             </Menu>

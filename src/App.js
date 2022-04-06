@@ -3,6 +3,7 @@ import { Routes, Route, Outlet } from "react-router-dom";
 import Home from './pages/Home';
 import Lieux from './pages/Lieux/Lieux';
 import SingleLieu from './pages/Lieux/SingleLieu';
+import Register from './pages/Login/Register';
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
         <Routes>
             <Route  path="/lieu/:id" element={<SingleLieu />} />
             <Route path="/lieux" element={<Lieux />} />
+            <Route path="/register" element={<Register />} />
             <Route index path="/" element={<Home />} />
         </Routes>
       <Outlet />

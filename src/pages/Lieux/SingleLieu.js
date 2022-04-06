@@ -10,6 +10,7 @@ import { Box } from "@mui/material";
 import { Map, MapMarker, Roadview } from "react-kakao-maps-sdk";
 import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
+import PersonIcon from '@mui/icons-material/Person';
 
 // Import Swiper styles
 import "swiper/css/free-mode";
@@ -28,6 +29,17 @@ const Geopoint = React.createContext({
 const SingleLieu = () => {
   const [lieux, setLieux] = useState([]);
   const [cities, setCities] = useState([]);
+  const [cats, setCats] = useState([]);
+
+    //Récupération des catégories
+    useEffect(() => {
+      const citiesCollection = collection(db, "categories");
+      getDocs(citiesCollection).then((snap) => {
+        snap.forEach((doc) => {
+          setCats([doc.data()]);
+        });
+      });
+    }, []);
 
   //récupération du paramètre de l'url
   let topicId = useParams();
@@ -58,22 +70,20 @@ const SingleLieu = () => {
   return (
     <>
       {lieux.map((l, index) => {
-        return <Page lieu={l} key={index} cities={cities} />;
+        return <Page lieu={l} key={index} cities={cities} cats={cats} />;
       })}
     </>
   );
 };
 
-
 const Page = (props) => {
-  const { lieu, cities } = props;
+  const { lieu, cities, cats } = props;
 
   return (
     <React.Fragment>
-      <Grid container spacing={0}>
-        <Grid item xs={6} sx={{ padding: "20px" }}>
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Box>
+      <Grid container spacing={0} sx={{ flexDirection: { md: 'row', xs: 'column-reverse'  }  }} >
+        <Grid item md={6} xs={12} sx={{ padding: "20px" }}>
+          <Box sx={{ display: "flex", alignItems: "center"}}>
               <Link
                 to="/"
                 style={{
@@ -87,24 +97,44 @@ const Page = (props) => {
                   return c.cities[lieu.citie_id];
                 })}
               </Link>
-            </Box>
           </Box>
-          <Box>
-            <Typography variant="h4">{lieu.title}</Typography>
+            <Typography variant="h4" sx={{  marginTop: '20px' }} >{lieu.title}</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', marginTop: '20px' }} >
+            <Typography
+              varaint="p"
+              sx={{
+                padding: "3px 5px",
+                fontSize: '12px',
+                pointerEvents: "none",
+                fontWeight: "bold",
+                borderRadius: '5px',
+                backgroundColor: "#005998",
+                width: 'max-content'
+              }}
+              color="white"
+              >
+              {cats.map((c) => {
+                return c.names[lieu.categorie_id];
+              })}
+            </Typography>
+            <Typography sx={{ display: 'flex', alignItems: 'center', marginLeft: '10px' }}  >
+              <PersonIcon />
+                {lieu.user}
+            </Typography>
           </Box>
-          <Box>
-            <Typography variant="p">{lieu.description}</Typography>
+          <Box sx={{  marginTop: '20px' }}>
+          <Typography variant="p">{lieu.description}</Typography>
           </Box>
         </Grid>
-        <Grid item xs={6}>
+        <Grid item md={6} xs={12}>
           <Diapo images={lieu.images} />
+        </Grid>
         </Grid>
         <Geopoint.Provider
           value={{ lat: lieu.geopoint._lat, long: lieu.geopoint._long }}
         >
           <Maps />
         </Geopoint.Provider>
-      </Grid>
     </React.Fragment>
   );
 };
@@ -112,29 +142,28 @@ const Page = (props) => {
 function Diapo(props) {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
 
-  const {images} = props
+  const { images } = props;
 
   const [imgRef, setImgRef] = useState([]);
   const [url, setUrl] = useState([]);
 
-//neo soft
-  const refs = ref(storage, "lieux")
-
+  const refs = ref(storage, "lieux");
   useEffect(() => {
-
-    listAll(refs).then(res => {
-      res.items.forEach(item => {
-        images.forEach(image => {
-          if(image === item.name){
-              getDownloadURL(item).then(url => {
-                setUrl(arr => [...arr, url] )
-              })
+    listAll(refs)
+      .then((res) => {
+        res.items.forEach((item) => {
+          images.forEach((image) => {
+            if (image === item.name) {
+              getDownloadURL(item).then((url) => {
+                setUrl((arr) => [...arr, url]);
+              });
             }
-        })
+          });
+        });
       })
-    }).catch(erreur => console.log(erreur))
-  },[])
-  console.log(url)
+      .catch((erreur) => console.log(erreur));
+  }, []);
+
   return (
     <>
       <Swiper
@@ -145,11 +174,13 @@ function Diapo(props) {
         modules={[FreeMode, Navigation, Thumbs]}
         className="singlePlaceDiapoTop"
       >
-
-      {url.map( (u,i) => {
-        return <SwiperSlide key={i} ><img src={u} /></SwiperSlide>
-      })}
-
+        {url.map((u, i) => {
+          return (
+            <SwiperSlide key={i}>
+              <img src={u} />
+            </SwiperSlide>
+          );
+        })}
       </Swiper>
       <Swiper
         onSwiper={setThumbsSwiper}
@@ -161,10 +192,13 @@ function Diapo(props) {
         modules={[FreeMode, Navigation, Thumbs]}
         className="singlePlaceDiapoBottom"
       >
-        {url.map( (u,j) => {
-        return <SwiperSlide key={j} ><img src={u} /></SwiperSlide>
+        {url.map((u, j) => {
+          return (
+            <SwiperSlide key={j}>
+              <img src={u} />
+            </SwiperSlide>
+          );
         })}
-
       </Swiper>
     </>
   );

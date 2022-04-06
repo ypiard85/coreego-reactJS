@@ -34,6 +34,16 @@ header svg{
   z-index: 100;
 }
 
+.loginForm{
+  width: 600px;
+  max-width: 100%;
+  margin: auto;
+}
+
+.loginForm .MuiBox-root{
+  margin: 20px 0;
+}
+
 
 @media screen and (max-width: 900px){
   .homeSwiper.swiper{
