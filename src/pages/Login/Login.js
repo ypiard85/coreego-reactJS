@@ -5,13 +5,14 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import { auth } from "../../backend/config";
-import { signInWithEmailAndPassword } from "@firebase/auth";
+import {getAuth, signInWithEmailAndPassword } from "@firebase/auth";
 import Alert from "@mui/material/Alert";
 
 function Login() {
   const email = useRef(null);
   const password = useRef(null);
+
+  const auth = getAuth();
 
   const [erreur, setErreur] = useState({ erreur: false, message: null });
   const [success, setSuccess] = useState({ valid: false, message: null });
@@ -22,17 +23,13 @@ function Login() {
     event.preventDefault();
     setIsLoad(true);
 
-    try {
-      signInWithEmailAndPassword(
-        auth,
-        email.current.value,
-        password.current.value
-      )
-        .then((userAuth) => {
-          return userAuth;
-        })
-        .catch((erreur) => console.log(erreur.code));
-    } catch (error) {}
+    signInWithEmailAndPassword(
+      auth,
+      email.current.value,
+      password.current.value
+    )
+      .finally(() => setIsLoad(false))
+
   };
 
   return (

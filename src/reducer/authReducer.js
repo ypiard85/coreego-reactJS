@@ -1,10 +1,18 @@
-export const  isAuthenticated =  (state = {}, action) => {
+export const isAuthenticated =  (state = {}, action) => {
     switch(action.type){
         case 'AUTH_STATE_CHANGED':
+          if(action.payload) {
             return {
               ...state,
-              user: action.payload
+              ...action.payload && {
+                id: action.payload.uid,
+                email: action.payload.email,
+                emailVerified: action.payload.emailVerified
+              }
             }
+          }
+          return null
+
         default :
             return state
     }

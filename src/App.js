@@ -5,11 +5,10 @@ import Lieux from './pages/Lieux/Lieux';
 import SingleLieu from './pages/Lieux/SingleLieu';
 import Register from './pages/Login/Register';
 import Login from './pages/Login/Login';
-import Auth from './Contexts/Auth';
-import {useDispatch, useSelector, useStore} from "react-redux";
+import AuthContext from './Contexts/Auth';
+import {useDispatch, useSelector} from "react-redux";
 import {useEffect} from "react";
-import { onAuthStateChanged } from "@firebase/auth";
-import {auth} from "./backend/config";
+import { onAuthStateChanged, getAuth } from "@firebase/auth";
 import {authAction} from "./reducer/authReducer";
 //https://www.youtube.com/watch?v=l5rUTjUpABg
 function App() {
@@ -17,15 +16,18 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    const auth = getAuth()
     onAuthStateChanged(auth, (currentUser) => {
       dispatch(authAction(currentUser));
     });
+    console.log(auth.currentUser);
+
   }, [])
 
   const authState = useSelector((state) => state.authReducer)
 
   return (
-    <Auth.Provider value={{ isAuthenticated: Boolean(authState) }} >
+    <AuthContext.Provider value={{ isAuthenticated: Boolean(authState) }} >
       <div className="App">
         <ResponsiveAppBar />
           <Routes>
@@ -37,7 +39,7 @@ function App() {
           </Routes>
         <Outlet />
       </div>
-    </Auth.Provider>
+    </AuthContext.Provider>
   );
 }
 
