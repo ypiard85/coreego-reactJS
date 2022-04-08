@@ -1,47 +1,36 @@
-import { useState, useRef, Redirect } from "react";
+import {useState, useRef, Redirect, useEffect} from "react";
 import { Box, Container } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import { auth } from "../../backend/config";
-import { signInWithEmailAndPassword, onAuthStateChanged } from "@firebase/auth";
+import {getAuth, signInWithEmailAndPassword } from "@firebase/auth";
 import Alert from "@mui/material/Alert";
-import { useDispatch, useSelector } from "react-redux";
-import { authAction } from "../../reducer/authReducer";
 
 function Login() {
   const email = useRef(null);
   const password = useRef(null);
+
+  const auth = getAuth();
 
   const [erreur, setErreur] = useState({ erreur: false, message: null });
   const [success, setSuccess] = useState({ valid: false, message: null });
   const [isLoad, setIsLoad] = useState(false);
   const [user, setUSer] = useState({});
 
-  const dispatch = useDispatch();
-  onAuthStateChanged(auth, (currentUser) => {
-    dispatch(authAction(currentUser));
-  });
-
   const handleSubmit = (event) => {
     event.preventDefault();
     setIsLoad(true);
 
-    try {
-      signInWithEmailAndPassword(
-        auth,
-        email.current.value,
-        password.current.value
-      )
-        .then((userAuth) => {
-          return userAuth;
-        })
-        .catch((erreur) => console.log(erreur.code));
-    } catch (error) {}
+    signInWithEmailAndPassword(
+      auth,
+      email.current.value,
+      password.current.value
+    )
+      .finally(() => setIsLoad(false))
+
   };
-  console.log(useSelector((state) => state.authReducer));
 
   return (
     <Container

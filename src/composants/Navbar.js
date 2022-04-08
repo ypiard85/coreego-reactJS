@@ -15,6 +15,9 @@ import MenuItem from '@mui/material/MenuItem';
 import {Link} from 'react-router-dom';
 import Logo from '../image/logo.png';
 import {auth, logOut} from '../backend/config';
+import {useSelector} from "react-redux";
+import AuthContext from "../Contexts/Auth";
+import {Icon} from "@mui/material";
 
 const pages = [
   {
@@ -27,7 +30,7 @@ const pages = [
   },
 ];
 
-const settings = [
+const authRoutes = [
   {
     name: "Créer un compte",
     path: '/register'
@@ -38,7 +41,7 @@ const settings = [
   },
 ];
 
-const settingsPrivate = [
+const userRoutes = [
   {
     name: "Profil",
     path: '/'
@@ -46,9 +49,10 @@ const settingsPrivate = [
 ];
 
 const ResponsiveAppBar = () => {
-  console.log(auth.currentUser)
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const authState = useSelector(state => state.authReducer)
+  const authCtx = useContext(AuthContext)
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -139,54 +143,60 @@ const ResponsiveAppBar = () => {
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="avatar">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: '45px' }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-              >
-              { (auth.currentUser ? (
-                <span>
-                 {settingsPrivate.map((s) => (
-                   <MenuItem key={s.name} onClick={handleCloseNavMenu}>
-                    <Typography textAlign="center" >
-                        <Link style={{ color: 'black' }} to={s.path} >{s.name}</Link>
-                      </Typography>
+            {authCtx.isAuthenticated && (
+              <>
+                <Box display="flex" alignItems={"center"}>
+                  <Button
+                    sx={{color: "text.primary"}}
+                    onClick={handleOpenUserMenu}
+                    startIcon={(
+                      <Icon>person</Icon>
+                    )}
+                  >
+                    {authState.email}
+                  </Button>
+                </Box>
+
+                <Menu
+                  sx={{ mt: '45px' }}
+                  id="menu-appbar"
+                  anchorEl={anchorElUser}
+                  anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  open={Boolean(anchorElUser)}
+                  onClose={handleCloseUserMenu}
+                >
+                  {userRoutes.map((s) => (
+                    <Link to={s.path} key={s.path}>
+                      <MenuItem sx={{color: "text.primary"}} key={s.name} onClick={handleCloseNavMenu}>
+                        {s.name}
+                      </MenuItem>
+                    </Link>
+                  ))}
+                  <MenuItem onClick={logOut} >
+                    Déconnexion
                   </MenuItem>
-                ))}
-                <MenuItem onClick={logOut} >
-                    <Typography textAlign="center" >
-                        <Link style={{ color: 'black' }} to="#" >Déconnexion</Link>
-                      </Typography>
-                  </MenuItem>
-                </span>
-              ) : (
-                <span>
-                {settings.map((s) => (
-                  <MenuItem key={s.name} onClick={handleCloseNavMenu}>
-                   <Typography textAlign="center" >
-                       <Link style={{ color: 'black' }} to={s.path} >{s.name}</Link>
-                     </Typography>
-                 </MenuItem>
-               ))}
-               </span>
-              ) )}
-            </Menu>
+                  </Menu>
+              </>
+            )}
+
+            {(!authCtx.isAuthenticated) && authRoutes.map((a, index) => (
+              <Link to={a.path} key={a.path}>
+                <Button
+                  key={a.path}
+                  sx={{ color: "text.primary", ...(index + 1 === authRoutes.length) && { ml: 1 }}}
+                >
+                  {a.name}
+                </Button>
+              </Link>
+            ))}
           </Box>
         </Toolbar>
       </Container>

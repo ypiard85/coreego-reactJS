@@ -9,18 +9,19 @@ import reportWebVitals from './reportWebVitals';
 import "swiper/css";
 import "swiper/css/navigation";
 //Redux
-import {createStore} from 'redux';
+import {applyMiddleware, createStore} from 'redux';
 import {allReducers} from './reducer/allReducer';
 import { Provider } from 'react-redux';
+import logger from 'redux-logger'
 
-const store = createStore(allReducers);
+const store = createStore(allReducers, {}, applyMiddleware(logger));
 
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
-    <Provider store={store}>
-      <App />
-    </Provider>
+      <Provider store={store}>
+        <App />
+      </Provider>
     </BrowserRouter>
   </React.StrictMode>,
   document.getElementById('root')

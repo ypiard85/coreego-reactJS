@@ -1,7 +1,7 @@
 import * as React from 'react'
 
-const Auth = React.createContext({
-    isAuthenticated: null
+const AuthContext = React.createContext({
+  isAuthenticated: false
 });
 
-export default Auth
+export default AuthContext
