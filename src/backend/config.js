@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import {initializeApp} from 'firebase/app';
-import {getAuth} from 'firebase/auth';
+import {getAuth, signOut } from 'firebase/auth';
 import { getFirestore } from "firebase/firestore";
 import {getStorage } from 'firebase/storage';
 // TODO: Add SDKs for Firebase products that you want to use
@@ -26,4 +26,10 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage();
 
-export  {auth, db, storage}
+const logOut = signOut(auth).then(() => {
+  // Sign-out successful.
+}).catch((error) => {
+  // An error happened.
+});
+
+export  {auth, db, storage, logOut}

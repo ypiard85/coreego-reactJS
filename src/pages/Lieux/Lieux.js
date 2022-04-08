@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useLayoutEffect } from "react";
+import React, { useState, useEffect, useCallback, useContext, useMemo } from "react";
 import { db, storage } from "../../backend/config.js";
 import { ref, getDownloadURL } from "firebase/storage";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import Container from "@mui/material/Container";
 import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
@@ -12,8 +12,20 @@ import { CardActionArea } from "@mui/material";
 import { Link } from "react-router-dom";
 import AddLocationIcon from "@mui/icons-material/AddLocation";
 import LoadingImg from '../../images/caree_loading.png';
+import Paper from '@mui/material/Paper';
+import InputBase from '@mui/material/InputBase';
+import IconButton from '@mui/material/IconButton';
+import SearchIcon from '@mui/icons-material/Search';
+import { auth } from "../../backend/config";
+import {useSelector} from 'react-redux';
+
+const SearchContext = React.createContext({
+  input: "",
+  SearchInit: () => {}
+});
 
 function Cards(props) {
+
   const { lieu, cats, citie, images } = props;
   const [url, setUrl] = useState();
   //Récupération des images dans le storage
@@ -84,12 +96,11 @@ function List() {
   const [lieux, setLieux] = useState([]);
   const [cities, setCities] = useState([]);
   const [cats, setCats] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   //Récupération des lieux
  useEffect(() => {
-    const lieuxCollection = collection(db, "lieux");
-    getDocs(lieuxCollection)
+  const r = collection(db, "lieux");
+    getDocs(r)
       .then((snap) => {
         snap.forEach((doc) => {
           lieux.push({ ...doc.data(), id: doc.id });
@@ -119,30 +130,76 @@ function List() {
     });
   }, []);
 
+  const {input} = useContext(SearchContext);
+
   return (
+    <>
     <Grid container spacing={2}>
-      {lieux.map((lieu, index) => {
-      return <Cards
-      lieu={lieu}
-      key={index}
-      citie={cities}
-      images={lieu.images[0]}
-      cats={cats}
-    />
+      {lieux.filter(val => {
+       return val.title.includes(input)
+      }).map((val, index) => {
+        return (<Cards
+        lieu={val}
+        key={index}
+        citie={cities}
+        images={val.images[0]}
+        cats={cats}
+        />)
       })}
     </Grid>
+    </>
   );
 
 }
 
 function Lieux() {
+
+  const [search, setSearch] = useState("")
+
+  const SearchInit = useCallback((event) => {
+    setSearch(event.target.value)
+  })
+
+  const value = useMemo(() => {
+    return{
+      input: search,
+      SearchInit
+    }
+  })
+
+
   return (
     <div>
       <Container sx={{ mt: 10 }}>
-        <List />
+        <SearchContext.Provider value={value}>
+          <Search />
+          <List />
+        </SearchContext.Provider>
       </Container>
     </div>
   );
+}
+
+function Search(){
+  const {SearchInit} = useContext(SearchContext);
+
+  return(
+    <Paper
+    component="div"
+    sx={{ p: '2px 4px', m: ' 0 auto 100px auto' , display: 'flex', alignItems: 'center', width: "800px", maxWidth: '100%',  }}
+    >
+    <InputBase
+      sx={{ ml: 1, flex: 1 }}
+      placeholder="Rechercher un lieu"
+      inputProps={{ 'aria-label': 'Rechercher un lieu' }}
+      onChange={SearchInit}
+      />
+    <IconButton type="submit" sx={{ p: '10px' }} aria-label="search">
+      <SearchIcon />
+    </IconButton>
+    </Paper>
+  )
+
 }
 
 export default Lieux;

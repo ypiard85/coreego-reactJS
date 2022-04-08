@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {useContext} from "react";
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -13,6 +14,7 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import {Link} from 'react-router-dom';
 import Logo from '../image/logo.png';
+import {auth, logOut} from '../backend/config';
 
 const pages = [
   {
@@ -32,11 +34,19 @@ const settings = [
   },
   {
     name: "Connexion",
-    path: '/register'
+    path: '/login'
+  },
+];
+
+const settingsPrivate = [
+  {
+    name: "Profil",
+    path: '/'
   }
 ];
 
 const ResponsiveAppBar = () => {
+  console.log(auth.currentUser)
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
@@ -150,13 +160,32 @@ const ResponsiveAppBar = () => {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
               >
-              {settings.map((s) => (
-                <MenuItem key={s.name} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center" >
-                      <Link style={{ color: 'black' }} to={s.path} >{s.name}</Link>
-                    </Typography>
-                </MenuItem>
-              ))}
+              { (auth.currentUser ? (
+                <span>
+                 {settingsPrivate.map((s) => (
+                   <MenuItem key={s.name} onClick={handleCloseNavMenu}>
+                    <Typography textAlign="center" >
+                        <Link style={{ color: 'black' }} to={s.path} >{s.name}</Link>
+                      </Typography>
+                  </MenuItem>
+                ))}
+                <MenuItem onClick={logOut} >
+                    <Typography textAlign="center" >
+                        <Link style={{ color: 'black' }} to="#" >Déconnexion</Link>
+                      </Typography>
+                  </MenuItem>
+                </span>
+              ) : (
+                <span>
+                {settings.map((s) => (
+                  <MenuItem key={s.name} onClick={handleCloseNavMenu}>
+                   <Typography textAlign="center" >
+                       <Link style={{ color: 'black' }} to={s.path} >{s.name}</Link>
+                     </Typography>
+                 </MenuItem>
+               ))}
+               </span>
+              ) )}
             </Menu>
           </Box>
         </Toolbar>

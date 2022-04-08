@@ -16,11 +16,11 @@ function Register() {
   const password = useRef(null);
   const confirmPassword = useRef(null);
   const [erreur, setErreur] = useState({erreur: false, message: null});
-  const [success, setCuccess] = useState({valid: false, message: null});
+  const [success, setSuccess] = useState({valid: false, message: null});
   const [isLoad, setIsLoad] = useState(false);
 
-  const emailRegex = new RegExp(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/);
-  const passwordRegex = new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/);
+  //const emailRegex = new RegExp(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/);
+  //const passwordRegex = new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/);
   function handleSubmit(event){
     event.preventDefault();
     setIsLoad(true)
