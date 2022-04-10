@@ -141,10 +141,7 @@ const Page = (props) => {
 
 function Diapo(props) {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
-
   const { images } = props;
-
-  const [imgRef, setImgRef] = useState([]);
   const [url, setUrl] = useState([]);
 
   const refs = ref(storage, "lieux");
@@ -209,7 +206,7 @@ function Maps() {
   return (
     <>
       <Grid container spacing={0}>
-        <Grid item xs={8}>
+        <Grid item md={8} xs={12}>
           <Roadview // 로드뷰를 표시할 Container
             position={{
               // 지도의 중심좌표
@@ -224,7 +221,7 @@ function Maps() {
             }}
           />
         </Grid>
-        <Grid item xs={4}>
+        <Grid item md={4} xs={12}>
           <Map
             center={{ lat: point.lat, lng: point.long }}
             style={{ width: "100%", height: "360px" }}
