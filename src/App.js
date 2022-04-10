@@ -28,7 +28,7 @@ function App() {
   const authState = useSelector((state) => state.authReducer)
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated:  (authState) }} >
+    <AuthContext.Provider value={{ isAuthenticated:  Boolean(authState) }} >
       <div className="App">
         <ResponsiveAppBar />
           <Routes>
