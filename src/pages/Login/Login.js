@@ -1,4 +1,4 @@
-import {useState, useRef, Redirect, useEffect} from "react";
+import {useState, useRef, useEffect} from "react";
 import { Box, Container } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
@@ -7,28 +7,37 @@ import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import {getAuth, signInWithEmailAndPassword } from "@firebase/auth";
 import Alert from "@mui/material/Alert";
+import {auth} from '../../backend/config'
+import {AuthService} from '../../Services/AuthService';
 
 function Login() {
   const email = useRef(null);
   const password = useRef(null);
 
-  const auth = getAuth();
 
-  const [erreur, setErreur] = useState({ erreur: false, message: null });
-  const [success, setSuccess] = useState({ valid: false, message: null });
+
+  const [erreur, setErreur] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [isLoad, setIsLoad] = useState(false);
   const [user, setUSer] = useState({});
 
   const handleSubmit = (event) => {
     event.preventDefault();
     setIsLoad(true);
-
-    signInWithEmailAndPassword(
-      auth,
+    AuthService.signInWithEmailAndPassword(
       email.current.value,
       password.current.value
-    )
-      .finally(() => setIsLoad(false))
+    ).then(res => {
+      if(res){
+        window.location.href = "/"
+      }
+    }).catch(error => {
+      if(error.code == "auth/user-not-found"){
+        setErreur("Aucun utilisateur n'a été trouvé")
+      }else if (error.code == "auth/wrong-password"){
+        setErreur("Mot de passe invalide")
+      }
+    }).finally(setIsLoad(false))
 
   };
 
@@ -83,9 +92,10 @@ function Login() {
                 )}
               </Button>
             </Box>
-            <Box sx={{ width: "100%" }} spacing={2}>
-              <Alert severity="error"></Alert>
-            </Box>
+            <Box sx={{ width: '100%' }}>
+                { (erreur != null) ? <Alert severity="error"> {erreur} </Alert> : '' }
+                { (success != null) ? <Alert severity="success">{success}</Alert> : '' }
+              </Box>
           </Container>
         </Paper>
       </form>

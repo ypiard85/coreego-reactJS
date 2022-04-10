@@ -27,7 +27,7 @@ const db = getFirestore(app);
 const storage = getStorage();
 
 const logOut = () => signOut(auth).then(() => {
-  // Sign-out successful.
+  window.location.href = "/"
 }).catch((error) => {
   // An error happened.
 });

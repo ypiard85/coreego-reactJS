@@ -45,6 +45,10 @@ const userRoutes = [
   {
     name: "Profil",
     path: '/'
+  },
+  {
+    name: "Ajouter un lieu",
+    path: '/ajouter-un-lieu'
   }
 ];
 
@@ -52,7 +56,7 @@ const ResponsiveAppBar = () => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const authState = useSelector(state => state.authReducer)
-  const authCtx = useContext(AuthContext)
+  const {isAuthenticated} = useContext(AuthContext)
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -89,7 +93,6 @@ const ResponsiveAppBar = () => {
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
-
               >
               <MenuIcon />
             </IconButton>
@@ -141,63 +144,78 @@ const ResponsiveAppBar = () => {
               </Button>
             ))}
           </Box>
-
-          <Box sx={{ flexGrow: 0 }}>
-            {authCtx.isAuthenticated && (
-              <>
-                <Box display="flex" alignItems={"center"}>
-                  <Button
-                    sx={{color: "text.primary"}}
-                    onClick={handleOpenUserMenu}
-                    startIcon={(
-                      <Icon>person</Icon>
-                    )}
+          { (!isAuthenticated) &&
+            <Box sx={{ flexGrow: 0 }}>
+            <Tooltip title="Open settings">
+              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+              </IconButton>
+            </Tooltip>
+            <Menu
+              sx={{ mt: '45px', color: "red" }}
+              id="menu-appbar"
+              anchorEl={anchorElUser}
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={Boolean(anchorElUser)}
+              onClose={handleCloseUserMenu}
+            >
+              {authRoutes.map((a, i) => (
+                <MenuItem key={i} onClick={handleCloseUserMenu}>
+                 <Link to={a.path} style={{ color: "black", width: '100%' }}
                   >
-                    {authState.email}
-                  </Button>
-                </Box>
-
-                <Menu
-                  sx={{ mt: '45px' }}
-                  id="menu-appbar"
-                  anchorEl={anchorElUser}
-                  anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-                  open={Boolean(anchorElUser)}
-                  onClose={handleCloseUserMenu}
-                >
-                  {userRoutes.map((s) => (
-                    <Link to={s.path} key={s.path}>
-                      <MenuItem sx={{color: "text.primary"}} key={s.name} onClick={handleCloseNavMenu}>
-                        {s.name}
-                      </MenuItem>
-                    </Link>
-                  ))}
-                  <MenuItem onClick={logOut} >
-                    Déconnexion
-                  </MenuItem>
-                  </Menu>
-              </>
-            )}
-
-            {(!authCtx.isAuthenticated) && authRoutes.map((a, index) => (
-              <Link to={a.path} key={a.path}>
-                <Button
-                  key={a.path}
-                  sx={{ color: "text.primary", ...(index + 1 === authRoutes.length) && { ml: 1 }}}
-                >
                   {a.name}
-                </Button>
               </Link>
-            ))}
+                </MenuItem>
+              ))}
+            </Menu>
           </Box>
+          }
+          { (isAuthenticated) &&
+              <Box sx={{ flexGrow: 0 }}>
+              <Tooltip title="Open settings">
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                </IconButton>
+              </Tooltip>
+              <Menu
+                sx={{ mt: '45px' }}
+                id="menu-appbar"
+                anchorEl={anchorElUser}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={Boolean(anchorElUser)}
+                onClose={handleCloseUserMenu}
+              >
+                {userRoutes.map((a, i) => (
+                  <MenuItem key={i} onClick={handleCloseUserMenu} >
+                   <Link to={a.path} key={a.path} style={{ color: "black", width: '100%' }} >
+                    {a.name}
+                   </Link>
+                  </MenuItem>
+                ))}
+                <MenuItem onClick={handleCloseUserMenu} >
+                   <Link to="#" onClick={logOut} style={{ color: "black", width: '100%' }} >
+                    Déconnexion
+                  </Link>
+                  </MenuItem>
+              </Menu>
+            </Box>
+          }
         </Toolbar>
       </Container>
       </AppBar>
