@@ -18,6 +18,7 @@ import {auth, logOut} from '../backend/config';
 import {useSelector} from "react-redux";
 import AuthContext from "../Contexts/Auth";
 import {Icon} from "@mui/material";
+import { AuthService } from '../Services/AuthService';
 
 const pages = [
   {
@@ -209,7 +210,7 @@ const ResponsiveAppBar = () => {
                   </MenuItem>
                 ))}
                 <MenuItem onClick={handleCloseUserMenu} >
-                   <Link to="#" onClick={logOut} style={{ color: "black", width: '100%' }} >
+                   <Link to="#" onClick={AuthService.logout} style={{ color: "black", width: '100%' }} >
                     Déconnexion
                   </Link>
                   </MenuItem>

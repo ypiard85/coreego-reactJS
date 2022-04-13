@@ -4,13 +4,17 @@ import TextField from '@mui/material/TextField';
 import Typography from "@mui/material/Typography";
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
-import {auth} from '../../backend/config';
+import {auth, logOut} from '../../backend/config';
 import { createUserWithEmailAndPassword, sendEmailVerification } from "@firebase/auth";
-import { useRef, useState } from "react";
-import Alert from '@mui/material/Alert'
-//import {AuthService} from '../../Services/AuthService'
+import { useEffect, useRef, useState } from "react";
+import Alert from '@mui/material/Alert';
+import {AuthService} from '../../Services/AuthService'
+
 
 function Register() {
+
+
+
 
   const email = useRef(null);
   const password = useRef(null);
@@ -23,16 +27,14 @@ function Register() {
   const passwordRegex = new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{5,})/);
   function handleSubmit(event){
     event.preventDefault();
-
     setIsLoad(true)
 
       if(emailRegex.test(email.current.value)){
         if(passwordRegex.test(password.current.value)){
           if(password.current.value === confirmPassword.current.value ){
-            createUserWithEmailAndPassword(auth, email.current.value, password.current.value).then(res=> {
+            AuthService.createUserWithEmailAndPassword(email.current.value, password.current.value).then(res=> {
               setErreur(null)
               setSuccess("Merci de votre inscription, merci de confirmer votre compte")
-              console.log(res)
             }).catch(error => {
               if(error.code == "auth/email-already-in-use"){
                 setSuccess(null)
@@ -43,6 +45,7 @@ function Register() {
               }
             })
             .finally(setIsLoad(false))
+
           }else{
             setSuccess(null)
             setErreur("Les mots de passe doivent être identique")
@@ -56,12 +59,7 @@ function Register() {
         setErreur("Merci d'utiliser un mail valide")
       }
 
-
-
-
-
   };
-
 
   return (
     <Container sx={{ display: 'flex', alignItems: 'center', alignContent: 'center', height: '80vh' }} >

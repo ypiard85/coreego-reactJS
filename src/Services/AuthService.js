@@ -1,9 +1,10 @@
 import {auth} from '../backend/config';
-import { signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, createUserWithEmailAndPassword, signOut } from "@firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "@firebase/auth";
 //https://www.youtube.com/watch?v=DuAv6Yqv9LI&t=2126s
 export const AuthService = {
     logout : async () => {
         await signOut(auth);
+        window.location.href = '/'
     },
     createUserWithEmailAndPassword: async (email, password) => {
         try {

@@ -11,6 +11,7 @@ import { Map, MapMarker, Roadview } from "react-kakao-maps-sdk";
 import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import PersonIcon from '@mui/icons-material/Person';
+import {CategorieService} from '../../Services/CategorieService';
 
 // Import Swiper styles
 import "swiper/css/free-mode";
@@ -33,14 +34,11 @@ const SingleLieu = () => {
 
     //Récupération des catégories
     useEffect(() => {
-      const citiesCollection = collection(db, "categories");
-      getDocs(citiesCollection).then((snap) => {
-        snap.forEach((doc) => {
-          setCats([doc.data()]);
-        });
-      });
+      CategorieService.getAll().then(res => {
+        setCats(res)
+      }).catch(e => console.log(e))
     }, []);
-
+    console.log(cats)
   //récupération du paramètre de l'url
   let topicId = useParams();
   //Récupération de la single lieux
@@ -167,6 +165,7 @@ function Diapo(props) {
         spaceBetween={10}
         navigation={false}
         loop={true}
+        loopFillGroupWithBlank={true}
         thumbs={{ swiper: thumbsSwiper }}
         modules={[FreeMode, Navigation, Thumbs]}
         className="singlePlaceDiapoTop"
@@ -184,8 +183,6 @@ function Diapo(props) {
         spaceBetween={0}
         slidesPerView={4}
         freeMode={true}
-        loops={true}
-        watchSlidesProgress={true}
         modules={[FreeMode, Navigation, Thumbs]}
         className="singlePlaceDiapoBottom"
       >
