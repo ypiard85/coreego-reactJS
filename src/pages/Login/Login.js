@@ -5,15 +5,12 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import {getAuth, signInWithEmailAndPassword } from "@firebase/auth";
 import Alert from "@mui/material/Alert";
-import {auth} from '../../backend/config'
 import {AuthService} from '../../Services/AuthService';
 
 function Login() {
   const email = useRef(null);
   const password = useRef(null);
-
 
 
   const [erreur, setErreur] = useState(null);
@@ -88,7 +85,7 @@ function Login() {
                 {isLoad ? (
                   <CircularProgress sx={{ color: "white", fontSize: "12px" }} />
                 ) : (
-                  "  Créer un compte"
+                  "  Je me connecte"
                 )}
               </Button>
             </Box>
