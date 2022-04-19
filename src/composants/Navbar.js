@@ -15,6 +15,10 @@ import MenuItem from '@mui/material/MenuItem';
 import {Link} from 'react-router-dom';
 import Logo from '../image/logo.png';
 import {auth, logOut} from '../backend/config';
+import {useSelector} from "react-redux";
+import AuthContext from "../Contexts/Auth";
+import {Icon} from "@mui/material";
+import { AuthService } from '../Services/AuthService';
 
 const pages = [
   {
@@ -27,7 +31,7 @@ const pages = [
   },
 ];
 
-const settings = [
+const authRoutes = [
   {
     name: "Créer un compte",
     path: '/register'
@@ -38,17 +42,22 @@ const settings = [
   },
 ];
 
-const settingsPrivate = [
+const userRoutes = [
   {
     name: "Profil",
     path: '/'
+  },
+  {
+    name: "Ajouter un lieu",
+    path: '/ajouter-un-lieu'
   }
 ];
 
 const ResponsiveAppBar = () => {
-  console.log(auth.currentUser)
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const authState = useSelector(state => state.authReducer)
+  const {isAuthenticated} = useContext(AuthContext)
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -85,7 +94,6 @@ const ResponsiveAppBar = () => {
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
-
               >
               <MenuIcon />
             </IconButton>
@@ -137,15 +145,15 @@ const ResponsiveAppBar = () => {
               </Button>
             ))}
           </Box>
-
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="avatar">
+          { (!isAuthenticated) &&
+            <Box sx={{ flexGrow: 0 }}>
+            <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
               </IconButton>
             </Tooltip>
             <Menu
-              sx={{ mt: '45px' }}
+              sx={{ mt: '45px', color: "red" }}
               id="menu-appbar"
               anchorEl={anchorElUser}
               anchorOrigin={{
@@ -159,35 +167,56 @@ const ResponsiveAppBar = () => {
               }}
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
-              >
-              { (auth.currentUser ? (
-                <span>
-                 {settingsPrivate.map((s) => (
-                   <MenuItem key={s.name} onClick={handleCloseNavMenu}>
-                    <Typography textAlign="center" >
-                        <Link style={{ color: 'black' }} to={s.path} >{s.name}</Link>
-                      </Typography>
-                  </MenuItem>
-                ))}
-                <MenuItem onClick={logOut} >
-                    <Typography textAlign="center" >
-                        <Link style={{ color: 'black' }} to="#" >Déconnexion</Link>
-                      </Typography>
-                  </MenuItem>
-                </span>
-              ) : (
-                <span>
-                {settings.map((s) => (
-                  <MenuItem key={s.name} onClick={handleCloseNavMenu}>
-                   <Typography textAlign="center" >
-                       <Link style={{ color: 'black' }} to={s.path} >{s.name}</Link>
-                     </Typography>
-                 </MenuItem>
-               ))}
-               </span>
-              ) )}
+            >
+              {authRoutes.map((a, i) => (
+                <MenuItem key={i} onClick={handleCloseUserMenu}>
+                 <Link to={a.path} style={{ color: "black", width: '100%' }}
+                  >
+                  {a.name}
+              </Link>
+                </MenuItem>
+              ))}
             </Menu>
           </Box>
+          }
+          { (isAuthenticated) &&
+              <Box sx={{ flexGrow: 0 }}>
+              <Tooltip title="Open settings">
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                </IconButton>
+              </Tooltip>
+              <Menu
+                sx={{ mt: '45px' }}
+                id="menu-appbar"
+                anchorEl={anchorElUser}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={Boolean(anchorElUser)}
+                onClose={handleCloseUserMenu}
+              >
+                {userRoutes.map((a, i) => (
+                  <MenuItem key={i} onClick={handleCloseUserMenu} >
+                   <Link to={a.path} key={a.path} style={{ color: "black", width: '100%' }} >
+                    {a.name}
+                   </Link>
+                  </MenuItem>
+                ))}
+                <MenuItem onClick={handleCloseUserMenu} >
+                   <Link to="#" onClick={AuthService.logout} style={{ color: "black", width: '100%' }} >
+                    Déconnexion
+                  </Link>
+                  </MenuItem>
+              </Menu>
+            </Box>
+          }
         </Toolbar>
       </Container>
       </AppBar>

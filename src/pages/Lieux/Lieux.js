@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback, useContext, useMemo } from "react";
+import React, { useState, useRef, useEffect, useCallback, useContext, useMemo } from "react";
 import { db, storage } from "../../backend/config.js";
 import { ref, getDownloadURL } from "firebase/storage";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import Container from "@mui/material/Container";
 import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
@@ -16,11 +16,15 @@ import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
-import { auth } from "../../backend/config";
-import {useSelector} from 'react-redux';
+
+//Import les services
+import {LieuService} from '../../Services/LieuService';
+import {CitieService} from '../../Services/CitieService';
+import {CategorieService} from '../../Services/CategorieService';
+import {StorageService} from '../../Services/StorageService';
 
 const SearchContext = React.createContext({
-  input: "",
+  input: "" ,
   SearchInit: () => {}
 });
 
@@ -30,13 +34,9 @@ function Cards(props) {
   const [url, setUrl] = useState();
   //Récupération des images dans le storage
   useEffect(() => {
-    const getImage = (id) => {
-      const getRef = ref(storage, "lieux/" + id);
-      getDownloadURL(getRef).then((x) => {
-        setUrl(x);
-      });
-    };
-    getImage(images);
+    StorageService.getOne(images).then(res=>{
+      setUrl(res)
+    }).catch(e => console.log(e))
   }, []);
 
   return (
@@ -79,58 +79,45 @@ function Cards(props) {
               component="p"
               >
               <AddLocationIcon sx={{ color: "#CE293B" }} />
-              {citie.map((e) => {
-                return e.cities[lieu.citie_id];
-              })}
+              { citie[lieu.citie_id] }
             </Typography>
           </CardContent>
         </CardActionArea>
         <Link to={"/lieu/" + lieu.id} className="link__card"></Link>
       </Card>
-
     </Grid>
     );
   }
 
 function List() {
+
   const [lieux, setLieux] = useState([]);
   const [cities, setCities] = useState([]);
   const [cats, setCats] = useState([]);
 
-  //Récupération des lieux
- useEffect(() => {
-  const r = collection(db, "lieux");
-    getDocs(r)
-      .then((snap) => {
-        snap.forEach((doc) => {
-          lieux.push({ ...doc.data(), id: doc.id });
-        });
-      })
-      .catch((erreur) => console.log(erreur));
+  //Get places
+  useEffect(() => {
+    LieuService.getAll().then(res=>{
+      setLieux(res)
+    }).catch(e => console.log(e))
+  }, [])
+
+  //Get cities
+  useEffect(() => {
+    CitieService.getAll().then(res => {
+      setCities(res[0].cities)
+    }).catch(e => console.log(e))
   }, []);
 
-
-  //Récupération de la ville
+  //Get categories
   useEffect(() => {
-    const citiesCollection = collection(db, "cities");
-    getDocs(citiesCollection).then((snap) => {
-      snap.forEach((doc) => {
-        setCities([doc.data()]);
-      });
-    });
-  }, []);
-
-  //Récupération des catégories
-  useEffect(() => {
-    const citiesCollection = collection(db, "categories");
-    getDocs(citiesCollection).then((snap) => {
-      snap.forEach((doc) => {
-        setCats([doc.data()]);
-      });
-    });
+    CategorieService.getAll().then(res => {
+      setCats(res)
+    }).catch(e => console.log(e))
   }, []);
 
   const {input} = useContext(SearchContext);
+
 
   return (
     <>
@@ -149,7 +136,6 @@ function List() {
     </Grid>
     </>
   );
-
 }
 
 function Lieux() {
@@ -181,6 +167,7 @@ function Lieux() {
 }
 
 function Search(){
+
   const {SearchInit} = useContext(SearchContext);
 
   return(

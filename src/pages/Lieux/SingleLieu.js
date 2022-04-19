@@ -11,6 +11,7 @@ import { Map, MapMarker, Roadview } from "react-kakao-maps-sdk";
 import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import PersonIcon from '@mui/icons-material/Person';
+import {CategorieService} from '../../Services/CategorieService';
 
 // Import Swiper styles
 import "swiper/css/free-mode";
@@ -33,14 +34,11 @@ const SingleLieu = () => {
 
     //Récupération des catégories
     useEffect(() => {
-      const citiesCollection = collection(db, "categories");
-      getDocs(citiesCollection).then((snap) => {
-        snap.forEach((doc) => {
-          setCats([doc.data()]);
-        });
-      });
+      CategorieService.getAll().then(res => {
+        setCats(res)
+      }).catch(e => console.log(e))
     }, []);
-
+    console.log(cats)
   //récupération du paramètre de l'url
   let topicId = useParams();
   //Récupération de la single lieux
@@ -141,10 +139,7 @@ const Page = (props) => {
 
 function Diapo(props) {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
-
   const { images } = props;
-
-  const [imgRef, setImgRef] = useState([]);
   const [url, setUrl] = useState([]);
 
   const refs = ref(storage, "lieux");
@@ -170,6 +165,7 @@ function Diapo(props) {
         spaceBetween={10}
         navigation={false}
         loop={true}
+        loopFillGroupWithBlank={true}
         thumbs={{ swiper: thumbsSwiper }}
         modules={[FreeMode, Navigation, Thumbs]}
         className="singlePlaceDiapoTop"
@@ -187,8 +183,6 @@ function Diapo(props) {
         spaceBetween={0}
         slidesPerView={4}
         freeMode={true}
-        loops={true}
-        watchSlidesProgress={true}
         modules={[FreeMode, Navigation, Thumbs]}
         className="singlePlaceDiapoBottom"
       >
@@ -209,7 +203,7 @@ function Maps() {
   return (
     <>
       <Grid container spacing={0}>
-        <Grid item xs={8}>
+        <Grid item md={8} xs={12}>
           <Roadview // 로드뷰를 표시할 Container
             position={{
               // 지도의 중심좌표
@@ -224,7 +218,7 @@ function Maps() {
             }}
           />
         </Grid>
-        <Grid item xs={4}>
+        <Grid item md={4} xs={12}>
           <Map
             center={{ lat: point.lat, lng: point.long }}
             style={{ width: "100%", height: "360px" }}

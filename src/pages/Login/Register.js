@@ -4,47 +4,62 @@ import TextField from '@mui/material/TextField';
 import Typography from "@mui/material/Typography";
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
-import {auth} from '../../backend/config';
-import { createUserWithEmailAndPassword } from "@firebase/auth";
-import { useRef, useState } from "react";
-import Alert from '@mui/material/Alert'
-import Stack from '@mui/material/Stack';
+import {auth, logOut} from '../../backend/config';
+import { createUserWithEmailAndPassword, sendEmailVerification } from "@firebase/auth";
+import { useEffect, useRef, useState } from "react";
+import Alert from '@mui/material/Alert';
+import {AuthService} from '../../Services/AuthService'
+
 
 function Register() {
+
+
+
 
   const email = useRef(null);
   const password = useRef(null);
   const confirmPassword = useRef(null);
-  const [erreur, setErreur] = useState({erreur: false, message: null});
-  const [success, setSuccess] = useState({valid: false, message: null});
+  const [erreur, setErreur] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [isLoad, setIsLoad] = useState(false);
-
-  //const emailRegex = new RegExp(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/);
-  //const passwordRegex = new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/);
+  const [user,setUSer] = useState();
+  const emailRegex = new RegExp(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/);
+  const passwordRegex = new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{5,})/);
   function handleSubmit(event){
     event.preventDefault();
     setIsLoad(true)
-    setTimeout(() => {
-      setIsLoad(false)
-    }, 2000 )
 
-    /*try {
-      console.log(emailRegex.test(email.current.value))
-      console.log(passwordRegex.test(password.current.value))
+      if(emailRegex.test(email.current.value)){
+        if(passwordRegex.test(password.current.value)){
+          if(password.current.value === confirmPassword.current.value ){
+            AuthService.createUserWithEmailAndPassword(email.current.value, password.current.value).then(res=> {
+              setErreur(null)
+              setSuccess("Merci de votre inscription, merci de confirmer votre compte")
+            }).catch(error => {
+              if(error.code == "auth/email-already-in-use"){
+                setSuccess(null)
+                setErreur("L'email est déjâ utilisé")
+              }else if(error.code == "auth/id-token-expired"){
+                setSuccess(null)
+                setErreur("Le jeton d'identification Firebase fourni a expiré")
+              }
+            })
+            .finally(setIsLoad(false))
 
-
-
-      createUserWithEmailAndPassword(auth, email.current.value, password.current.value).then(res=> {
-        console.log(res)
-      }).catch(error => console.log(error))
-
-    } catch (error) {
-        alert(error)
-    }*/
-
+          }else{
+            setSuccess(null)
+            setErreur("Les mots de passe doivent être identique")
+          }
+        }else{
+            setSuccess(null)
+            setErreur("Le mot de passe doit contenir au moins 1 majuscule, 1 caractère spécial, avec au minimum 5 caractères")
+        }
+      }else{
+        setSuccess(null)
+        setErreur("Merci d'utiliser un mail valide")
+      }
 
   };
-
 
   return (
     <Container sx={{ display: 'flex', alignItems: 'center', alignContent: 'center', height: '80vh' }} >
@@ -68,8 +83,9 @@ function Register() {
                 {isLoad ? <CircularProgress sx={{ color: 'white', fontSize: '12px' }} /> : '  Créer un compte' }
                 </Button>
               </Box>
-              <Box sx={{ width: '100%' }} spacing={2}>
-                <Alert severity="error">This is an error alert — check it out!</Alert>
+              <Box sx={{ width: '100%' }}>
+                { (erreur != null) ? <Alert severity="error"> {erreur} </Alert> : '' }
+                { (success != null) ? <Alert severity="success">{success}</Alert> : '' }
               </Box>
           </Container>
         </Paper>
