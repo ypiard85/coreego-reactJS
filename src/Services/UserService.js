@@ -25,14 +25,16 @@ export const UserService = {
 
     verifPseudo: async (p) => {
         try {
-            var message = "";
+            var message = null;
           await getDocs(usercol).then((snap) => {
                 snap.forEach(docs => {
-                if(docs.data().pseudo == p.trim()){
-                        message = "Le pseudo est le même"
-                    }else{
-                        message = null
-                    }
+                if(p.length <= 5){
+                    message = "Votre mot de passe doit avoir au minimum 5 caractères"
+                }else if(docs.data().pseudo == p){
+                    message = "Le pseudo " + p + " existe déjâ"
+                }else{
+                   message = null 
+                }
                 })
           });
           return message;
