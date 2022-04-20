@@ -32,7 +32,7 @@ function Register() {
       if(emailRegex.test(email.current.value)){
         if(passwordRegex.test(password.current.value)){
           if(password.current.value === confirmPassword.current.value ){
-            AuthService.createUserWithEmailAndPassword(email.current.value, password.current.value).then(res=> {
+            createUserWithEmailAndPassword(auth, email.current.value, password.current.value).then(res=> {
               setErreur(null)
               setSuccess("Merci de votre inscription, merci de confirmer votre compte")
             }).catch(error => {
@@ -45,7 +45,6 @@ function Register() {
               }
             })
             .finally(setIsLoad(false))
-
           }else{
             setSuccess(null)
             setErreur("Les mots de passe doivent être identique")

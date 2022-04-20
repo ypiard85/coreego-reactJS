@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useContext} from "react";
+import {useContext, useState} from "react";
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -19,6 +19,7 @@ import {useSelector} from "react-redux";
 import AuthContext from "../Contexts/Auth";
 import {Icon} from "@mui/material";
 import { AuthService } from '../Services/AuthService';
+import {UserService} from '../Services/UserService';
 
 const pages = [
   {
@@ -42,22 +43,15 @@ const authRoutes = [
   },
 ];
 
-const userRoutes = [
-  {
-    name: "Profil",
-    path: '/'
-  },
-  {
-    name: "Ajouter un lieu",
-    path: '/ajouter-un-lieu'
-  }
-];
+
 
 const ResponsiveAppBar = () => {
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
-  const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const [anchorElNav, setAnchorElNav] = useState(null);
+  const [anchorElUser, setAnchorElUser] = useState(null);
   const authState = useSelector(state => state.authReducer)
   const {isAuthenticated} = useContext(AuthContext)
+  const [profil , setProfil] = useState(false);
+  const [userID, setUSerID] = useState();
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -73,6 +67,29 @@ const ResponsiveAppBar = () => {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+
+  React.useEffect(() => {
+    if(auth.currentUser){
+      setUSerID(auth.currentUser.uid)
+    }
+  }) 
+
+  React.useEffect(() => {
+    UserService.hasProfil(userID).then(res => {
+      setProfil(res)
+    }).catch(e => console.log(e))
+  })
+
+  const userRoutes = [
+    {
+      name: "Profil",
+      path: profil ? `/profil/${userID}` : `/create-profil/${userID}`
+    },
+    {
+      name: "Ajouter un lieu",
+      path: '/ajouter-un-lieu'
+    }
+  ];
 
   return (
     <div>

@@ -123,7 +123,7 @@ function List() {
     <>
     <Grid container spacing={2}>
       {lieux.filter(val => {
-       return val.title.includes(input)
+       return val.title.toLowerCase().includes(input.toLowerCase())
       }).map((val, index) => {
         return (<Cards
         lieu={val}
