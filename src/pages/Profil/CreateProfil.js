@@ -19,6 +19,8 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InstagramIcon from '@mui/icons-material/Instagram';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import TwitterIcon from '@mui/icons-material/Twitter';
 
 const steps = [
     'Ajouter un pseudo',
@@ -27,36 +29,37 @@ const steps = [
     'Photo de profil',
   ];
 
-
-const SnsContext = React.createContext({instagram: "", facebook: "", tiktok: "", twitter: "" })
-
 const CreateProfil = () => {
     //Pseudo control
     const [pseudo, setPseudo] = useState("");
     const [pseudoErrorMessage, setPseudoErrorMessage] = useState(null);
     const [pseudoValid,setPseudoValid] = useState(false);
-    const [sns, setSns] = useState({instagram: "", facebook: "", tiktok: "", twitter: "" });
     const [description, setDescription] = useState();
+    const [instagram, setInstagram] = useState("");
+    const [facebook, setFacebook] = useState("");
+    const [twitter, setTwitter] = useState("");
+    const [tiktok, setTiktok] = useState("");
 
+    
     //Pseudo verif
     UserService.verifPseudo(pseudo).then(res => {
         setPseudoErrorMessage(res)
-    })
-
-    const handlePseudo = (event) => {
+      })
+      
+      const handlePseudo = (event) => {
         setPseudo(event.target.value)
-    }
-
-    const initSpace = (event) => {
+      }
+      
+      const initSpace = (event) => {
         if(event.keyCode == 32){
-           event.target.value = pseudo.replace(/\s/g, "")
-           return true
+          event.target.value = pseudo.replace(/\s/g, "")
+          return true
         }
-    }
-
-    const [activeStep, setActiveStep] = React.useState(2);
-    const [completed, setCompleted] = React.useState({});
-  
+      }
+      
+      const [activeStep, setActiveStep] = React.useState(2);
+      const [completed, setCompleted] = React.useState({});
+      
     const totalSteps = () => {
       return steps.length;
     };
@@ -64,19 +67,101 @@ const CreateProfil = () => {
     const completedSteps = () => {
       return Object.keys(completed).length;
     };
-
+    
     const nextStep = () => {
-        setActiveStep(activeStep + 1)
+      setActiveStep(activeStep + 1)
     }
     
     const handleDescription = (event) => {
-        setDescription(event.target.value)
+      setDescription(event.target.value)
     }
+    
+    const handleInstagram = (event) => {
+      setInstagram(event.target.value)
+    }
+
+    const handleFacebook = (event) => {
+      setFacebook(event.target.value)
+    }
+
+    const handleTwitter = (event) => {
+      setTwitter(event.target.value)
+    }
+
+    const handleTiktok = (event) => {
+      setTiktok(event.target.value)
+    }
+
+    const [expanded, setExpanded] = React.useState(false);
+
+    const handleChange = (panel) => (event, isExpanded) => {
+      setExpanded(isExpanded ? panel : false);
+    };
+
+    const regextUrl = new RegExp(/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/)
+
+    const acordeons = [
+      {
+        titre: "Instagram",
+        label: "Mon instagram",
+        icon: <InstagramIcon/>,
+        def: handleInstagram,
+        value: instagram,
+        valid: true,
+      },
+      {
+        titre: "Facebook",
+        label: "Mon facebook",
+        icon: <FacebookIcon/>,
+        def: handleFacebook,
+        value: facebook,
+        valid: true,
+      },
+      {
+        titre: "Twitter",
+        label: "Mon twitter",
+        icon: <TwitterIcon/>,
+        def: handleTwitter,
+        value: twitter,
+        valid: true,
+      },
+      {
+        titre: "TikTok",
+        label: "Mon tiktok",
+        icon: <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 50 50" width="20px" height="20px"><path d="M41,4H9C6.243,4,4,6.243,4,9v32c0,2.757,2.243,5,5,5h32c2.757,0,5-2.243,5-5V9C46,6.243,43.757,4,41,4z M37.006,22.323 c-0.227,0.021-0.457,0.035-0.69,0.035c-2.623,0-4.928-1.349-6.269-3.388c0,5.349,0,11.435,0,11.537c0,4.709-3.818,8.527-8.527,8.527 s-8.527-3.818-8.527-8.527s3.818-8.527,8.527-8.527c0.178,0,0.352,0.016,0.527,0.027v4.202c-0.175-0.021-0.347-0.053-0.527-0.053 c-2.404,0-4.352,1.948-4.352,4.352s1.948,4.352,4.352,4.352s4.527-1.894,4.527-4.298c0-0.095,0.042-19.594,0.042-19.594h4.016 c0.378,3.591,3.277,6.425,6.901,6.685V22.323z"/></svg>,
+        def: handleTiktok,
+        value: tiktok,
+        valid: true,
+      },
+    ]
+    
+    acordeons.forEach(a => {
+      if(a.value !== ""){
+        if(regextUrl.test(a.value)){
+          a.valid = true
+        }else{
+          a.valid = false
+        }
+      }
+    })
+
+    //Vérifier si tous les input sont bien des URLs
+    var validation = acordeons.filter(v => v.valid === false );
+
+    const etatValidation = () => {
+        if(validation.length > 0){
+          return false
+        }else{
+          return true
+        }        
+    }
+    //
+    
 
     return(
         <Container>
-            <Box sx={{ width: '100%', mt: 10  }}>
-            <Stepper nonLinear activeStep={activeStep}>
+            <Box sx={{ width: '100%', maxWidth: "100%", mt: 10  }}>
+            <Stepper activeStep={activeStep} sx={{flexWrap: 'wrap'}} >
                 {steps.map((label, index) => (
                 <Step key={label} completed={completed[index]}>
                     <StepButton color="inherit">
@@ -85,7 +170,7 @@ const CreateProfil = () => {
                 </Step>
                 ))}
             </Stepper>
-      <div style={{ marginTop: '100px' }}>
+          <div style={{ marginTop: '100px' }}>
           <React.Fragment>
             <Box sx={{ display: activeStep == 0 ? 'flex' : 'none', flexDirection: "column", width: '300px', maxWidth: "100%", m:'auto'  }} >
                 <TextField
@@ -102,22 +187,58 @@ const CreateProfil = () => {
                 </Fab>
             </Box>
 
-            <Box sx={{  display: activeStep == 1 ? 'flex' : 'none',  flexDirection: "column",  maxWidth: "100%", m:'auto'  }}>
+            <Box sx={{ display: activeStep == 1 ? 'flex' : 'none',  flexDirection: "column",  maxWidth: "100%", m:'auto'  }}>
             <TextField
                 onChange={handleDescription}
                 id="outlined-helperText"
                 label="Description du profil"
                 multiline
                 minRows={10}
-                value={description}               
+                value={description}
                 />
                 <Fab variant="contained" color="success" sx={{ m: 'auto', mt: 3 }} onClick={nextStep} >
                 <DoneIcon />
                 </Fab>
             </Box>     
-            <SnsContext.Provider value={sns}>
-                <SnsControl id={activeStep} sns={sns} />
-            </SnsContext.Provider>    
+            <Box style={{ width: '500px', maxWidth: "100%", m:'auto', display: activeStep === 2 ? 'block' : 'none' }} >
+                {acordeons.map((a,i) => {
+                  return (        
+                    <Accordion  expanded={expanded === `panel${i}`} onChange={handleChange(`panel${i}`)} key={i}>
+                      {a.value != "" ?
+                      <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="panel1bh-content"
+                        id="panel1bh-header"
+                        sx={{ backgroundColor: a.valid ? ""  : "#CE293B"  }}
+                        >                                                
+                        <Typography sx={{ width: '33%', flexShrink: 0 }}>                                     
+                        {a.icon}
+                        </Typography>
+                        <Typography sx={{ color: 'text.secondary' }}> {a.titre} </Typography>
+                      </AccordionSummary>
+                        :
+                        <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="panel1bh-content"
+                        id="panel1bh-header"                        
+                        >
+                        <Typography sx={{ width: '33%', flexShrink: 0 }}>                                     
+                        {a.icon}
+                        </Typography>
+                        <Typography sx={{ color: 'text.secondary' }}> {a.titre} </Typography>
+                      </AccordionSummary>
+                      }
+                    <AccordionDetails>
+                      <TextField id="standard-basic" onChange={a.def} value={a.value} label={a.label} type="url" variant="standard" fullWidth  />
+                    </AccordionDetails>
+                  </Accordion>
+                  )
+                })}
+                <Fab variant="contained" color="success" sx={{ m: 'auto', mt: 3 }} onClick={etatValidation() ? nextStep : ""} disabled={etatValidation() ? false : true} >
+                <DoneIcon />
+              </Fab>
+              </Box>
+
           </React.Fragment>
       </div>
     </Box>
@@ -125,44 +246,5 @@ const CreateProfil = () => {
     )
 }
 
-
-function SnsControl(props){
-    const [instagram, setInstagram] = useState("");
-
-    const {id} = props
-
-    const snscontext = React.useContext(SnsContext);
-
-    const handleInsta = (event) => {
-        setInstagram(event.target.value);
-    }   
-
-    const [expanded, setExpanded] = React.useState(false);
-
-    const handleChange = (panel) => (event, isExpanded) => {
-      setExpanded(isExpanded ? panel : false);
-    };
-
-    return(
-        <div style={{ width: '500px', maxWidth: "100%", m:'auto', display: id == 2 ? 'block' : 'none' }} >
-        <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel1bh-content"
-          id="panel1bh-header"
-        >
-          <Typography sx={{ width: '33%', flexShrink: 0 }}>
-            <InstagramIcon/>
-          </Typography>
-          <Typography sx={{ color: 'text.secondary' }}> {instagram.length > 0 ? instagram : "INSTAGRAM"} </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-        <TextField id="standard-basic" onChange={handleInsta} label="Url instagram" type="url" variant="standard" fullWidth  />
-        </AccordionDetails>
-      </Accordion>
-    </div>
-    )
-
-}
 
 export default CreateProfil
