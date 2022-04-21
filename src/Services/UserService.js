@@ -7,17 +7,23 @@ const usercol = collection(db, 'users');
 export const UserService = {
     hasProfil : async (id) => {
         try {
-            let hasLogin = false;
-            getDocs(usercol).then((snap) => {
+        const userpseudo = []
+        var haveAcount = false   
+           await getDocs(usercol).then((snap) => {
                 snap.forEach(docs => {
-                  if(docs && docs.id === id ){
-                      hasLogin = true
-                    }else{
-                    hasLogin = false
-                    }
-                })
-          });
-          return hasLogin;
+                    if(docs.id === id){
+                       userpseudo.push(docs.id)
+                       if(userpseudo.length === 1){
+                            haveAcount = true
+                        }else{
+                            haveAcount = false
+                        }   
+                    }                    
+                })              
+          });       
+
+          return haveAcount;
+
         } catch (error) {
             console.log(error)
         }

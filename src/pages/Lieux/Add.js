@@ -156,13 +156,14 @@ function TransitionsModal(props) {
       inputDescription != ""
     ) {
       if (inputFile.length > 0) {
+        let nb = Math.round(Math.random() * 300000)
         for (let m = 0; m < inputFile.length; m++) {
           var storageRef = ref(
             storage,
-            `/lieux/${inputFile[m].item.name.replace(/ /g, "")}`
+            `/lieux/${nb}`
           );
           const u = uploadBytesResumable(storageRef, inputFile[m].item);
-          imgStorage.push(inputFile[m].item.name.replace(/ /g, ""));
+          imgStorage.push(nb);
           u.on("state_changed", (snap) => {
             const prog = Math.round(
               (snap.bytesTransferred / snap.totalBytes) * 100

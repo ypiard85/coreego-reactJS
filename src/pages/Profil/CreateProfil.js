@@ -1,19 +1,15 @@
 import * as React from 'react';
 import { useState } from "react"
-import { Container, Typography, TextField, Fab, Input } from "@mui/material"
+import { storage, auth, db } from "../../backend/config.js";
+import { Container, Typography, TextField, Fab, Alert, AlertTitle, CircularProgress   } from "@mui/material"
 import {UserService} from '../../Services/UserService';
 import Box from '@mui/material/Box';
-import { useTheme } from '@mui/material/styles';
-import MobileStepper from '@mui/material/MobileStepper';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
-import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import DoneIcon from '@mui/icons-material/Done';
 import Stepper from '@mui/material/Stepper';
 import StepButton from '@mui/material/StepButton';
 import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -21,7 +17,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import TwitterIcon from '@mui/icons-material/Twitter';
-import Avatar from '@mui/material/Avatar';
+import { doc, setDoc, collection } from "firebase/firestore";
+import { getStorage, ref, uploadBytesResumable } from "firebase/storage";
+
 
 const steps = [
     'Ajouter un pseudo',
@@ -34,14 +32,19 @@ const CreateProfil = () => {
     //Pseudo control
     const [pseudo, setPseudo] = useState("");
     const [pseudoErrorMessage, setPseudoErrorMessage] = useState(null);
-    const [pseudoValid,setPseudoValid] = useState(false);
-    const [description, setDescription] = useState();
+    //const [pseudoValid,setPseudoValid] = useState(false);
+    const [description, setDescription] = useState("");
     const [instagram, setInstagram] = useState("");
     const [facebook, setFacebook] = useState("");
     const [twitter, setTwitter] = useState("");
     const [tiktok, setTiktok] = useState("");
     const [file, setFile] = useState([]);
     const [fileView, setFileView] = useState();
+    const [loading, setLoading] = React.useState(false);
+
+    const [messageValidation, setMessageValidation]  = useState("") 
+  
+
     //Pseudo verif
     UserService.verifPseudo(pseudo).then(res => {
         setPseudoErrorMessage(res)
@@ -59,15 +62,7 @@ const CreateProfil = () => {
       }
       
       const [activeStep, setActiveStep] = React.useState(3);
-      const [completed, setCompleted] = React.useState({});
       
-    const totalSteps = () => {
-      return steps.length;
-    };
-    
-    const completedSteps = () => {
-      return Object.keys(completed).length;
-    };
     
     const nextStep = () => {
       setActiveStep(activeStep + 1)
@@ -172,13 +167,60 @@ const CreateProfil = () => {
           reader.readAsDataURL(fileimg)
         }
       }
-  console.log(file)
+
+      const fetchData = () => {
+          let nb = Math.round(Math.random() * (300000 * 10)) + auth.currentUser.uid
+              //Upload image
+              var storageRef = ref(storage,`/avatar/${nb}`);
+              uploadBytesResumable(storageRef, file);
+                
+              const userRef = doc(db, 'users', auth.currentUser.uid);
+              setDoc(userRef, {
+                pseudo: pseudo,
+                description: description,
+                avatar: nb,
+                instagram: instagram,
+                facebook: facebook,
+                twitter: twitter,
+                tiktok: tiktok
+              });
+      }
+
+      
+      const handleSubmit = () => {        
+        if(pseudoErrorMessage != ""){
+          if(etatValidation()){
+            setLoading(true)
+            setTimeout(() => {
+              setLoading(false)
+              setMessageValidation("Votre profil à été créé avec Succès"); 
+              fetchData()             
+              }, 2000);             
+              setTimeout(() => {                
+                window.location.href = "/profil/" + auth.currentUser.uid
+              }, 3000)
+            }else{
+              setActiveStep(2);
+              alert("Merci de coriger vos URLs")
+            }
+        }else{
+          setActiveStep(0);
+          alert(pseudoErrorMessage)
+        }   
+      }
+
+
+
     return(
         <Container>
+            <Alert severity="success" sx={{mt:10, display: messageValidation != "" ? 'blobk' : 'none' }}  >
+            <AlertTitle>Success</AlertTitle>
+              {messageValidation}
+            </Alert>
             <Box sx={{ width: '100%', maxWidth: "100%", mt: 10  }}>
             <Stepper activeStep={activeStep} sx={{flexWrap: 'wrap'}} >
                 {steps.map((label, index) => (
-                <Step key={label} completed={completed[index]}>
+                <Step key={label}>
                     <StepButton color="inherit">
                     {label}
                     </StepButton>
@@ -188,6 +230,9 @@ const CreateProfil = () => {
           <div style={{ marginTop: '100px' }}>
           <React.Fragment>
             <Box sx={{ display: activeStep == 0 ? 'flex' : 'none', flexDirection: "column", width: '300px', maxWidth: "100%", m:'auto'  }} >
+              <Typography sx={{mb:3}}>
+                Le pseudo ne peut pas être changé
+              </Typography>
                 <TextField
                 onChange={handlePseudo}
                 id="outlined-helperText"
@@ -253,21 +298,31 @@ const CreateProfil = () => {
                 <DoneIcon />
               </Fab>
               </Box>
-              <Box sx={{width: '500px', m: 'auto', maxWidth: '100%', position: 'relative'}}>
-              <Paper elevation={8} sx={{py:5, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%'}}>
-              <img src={typeof file === undefined ? '' : "https://cdn-icons-png.flaticon.com/512/147/147142.png" } id="av" alt="" style={{width: '150px', height: '150px', borderRadius: '50%'}} />
-                <input onChange={handleAvatar} id="fileimg" accept='image/png, image/jpg, image/jpeg' type="file" style={{cursor: 'pointer', position: 'absolute', opacity: '0', top: 0, left: 0, right: 0, bottom:0 , height: '100%', width: '100%'}} />
-                <Typography sx={{ p:2, mt:5, border: '3px dashed  #CE293B'}} variant="h6" component="h6">
-                Télécharger ma photo de profil
-                </Typography>
-              </Paper>
+              <Box sx={{width: '500px', m: 'auto', maxWidth: '100%', position: 'relative', display: activeStep === 3 ? 'block' : 'none' }} >
+                <Paper elevation={8} sx={{py:5, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%'}}>
+                <img src={typeof file === undefined ? '' : "https://cdn-icons-png.flaticon.com/512/147/147142.png" } id="av" alt="" style={{width: '150px', height: '150px', borderRadius: '50%'}} />
+                  <input onChange={handleAvatar} id="fileimg" accept='image/png, image/jpg, image/jpeg' type="file" style={{cursor: 'pointer', position: 'absolute', opacity: '0', top: 0, left: 0, right: 0, bottom:0 , height: '100%', width: '100%'}} />
+                  <Typography sx={{ p:2, mt:5, border: '3px dashed  #CE293B'}} variant="h6" component="h6">
+                  Télécharger ma photo de profil
+                  </Typography>
+                </Paper>                                
               </Box>
+              <Box sx={{display: "flex", justifyContent: 'center', flexDirection: 'column', alignItems: 'center' , mt:5}}>   
+                {loading && (
+                  <CircularProgress
+                    size={68}                     
+                    sx={{mb:4, width: 'max-content', color: 'green'}}
+                  />
+                )}             
+                <Button variant="contained" sx={{width: 'max-content'}} disabled={loading ? true : false} onClick={handleSubmit}>Créer mon profil</Button>
+                </Box>
           </React.Fragment>
       </div>
     </Box>  
     </Container>
     )
 }
+
 
 
 export default CreateProfil

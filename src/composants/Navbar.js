@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useContext, useState} from "react";
+import {useContext, useState, useEffect} from "react";
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -15,7 +15,7 @@ import MenuItem from '@mui/material/MenuItem';
 import {Link} from 'react-router-dom';
 import Logo from '../image/logo.png';
 import {auth, logOut} from '../backend/config';
-import {useSelector} from "react-redux";
+//import {useSelector} from "react-redux";
 import AuthContext from "../Contexts/Auth";
 import {Icon} from "@mui/material";
 import { AuthService } from '../Services/AuthService';
@@ -48,7 +48,6 @@ const authRoutes = [
 const ResponsiveAppBar = () => {
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
-  const authState = useSelector(state => state.authReducer)
   const {isAuthenticated} = useContext(AuthContext)
   const [profil , setProfil] = useState(false);
   const [userID, setUSerID] = useState();
@@ -68,17 +67,18 @@ const ResponsiveAppBar = () => {
     setAnchorElUser(null);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if(auth.currentUser){
       setUSerID(auth.currentUser.uid)
     }
   }) 
 
-  React.useEffect(() => {
+  useEffect(() => {
     UserService.hasProfil(userID).then(res => {
       setProfil(res)
     }).catch(e => console.log(e))
   })
+
 
   const userRoutes = [
     {
