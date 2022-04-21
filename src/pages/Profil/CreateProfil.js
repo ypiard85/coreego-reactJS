@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from "react"
-import { Container, Typography, TextField, Fab } from "@mui/material"
+import { Container, Typography, TextField, Fab, Input } from "@mui/material"
 import {UserService} from '../../Services/UserService';
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
@@ -21,6 +21,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import TwitterIcon from '@mui/icons-material/Twitter';
+import Avatar from '@mui/material/Avatar';
 
 const steps = [
     'Ajouter un pseudo',
@@ -39,8 +40,8 @@ const CreateProfil = () => {
     const [facebook, setFacebook] = useState("");
     const [twitter, setTwitter] = useState("");
     const [tiktok, setTiktok] = useState("");
-
-    
+    const [file, setFile] = useState([]);
+    const [fileView, setFileView] = useState();
     //Pseudo verif
     UserService.verifPseudo(pseudo).then(res => {
         setPseudoErrorMessage(res)
@@ -57,7 +58,7 @@ const CreateProfil = () => {
         }
       }
       
-      const [activeStep, setActiveStep] = React.useState(2);
+      const [activeStep, setActiveStep] = React.useState(3);
       const [completed, setCompleted] = React.useState({});
       
     const totalSteps = () => {
@@ -157,7 +158,21 @@ const CreateProfil = () => {
     }
     //
     
-
+    const handleAvatar = (event) => {
+        //setFile([])
+        var preview = document.querySelector('#av');
+        var fileimg = document.getElementById('fileimg').files[0]
+        setFile(event.target.files[0])
+        setFileView(preview)
+        var reader = new FileReader();
+        reader.addEventListener("load", function(){
+            preview.src = reader.result;
+        }, false)
+        if(fileimg){
+          reader.readAsDataURL(fileimg)
+        }
+      }
+  console.log(file)
     return(
         <Container>
             <Box sx={{ width: '100%', maxWidth: "100%", mt: 10  }}>
@@ -238,10 +253,18 @@ const CreateProfil = () => {
                 <DoneIcon />
               </Fab>
               </Box>
-
+              <Box sx={{width: '500px', m: 'auto', maxWidth: '100%', position: 'relative'}}>
+              <Paper elevation={8} sx={{py:5, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%'}}>
+              <img src={typeof file === undefined ? '' : "https://cdn-icons-png.flaticon.com/512/147/147142.png" } id="av" alt="" style={{width: '150px', height: '150px', borderRadius: '50%'}} />
+                <input onChange={handleAvatar} id="fileimg" accept='image/png, image/jpg, image/jpeg' type="file" style={{cursor: 'pointer', position: 'absolute', opacity: '0', top: 0, left: 0, right: 0, bottom:0 , height: '100%', width: '100%'}} />
+                <Typography sx={{ p:2, mt:5, border: '3px dashed  #CE293B'}} variant="h6" component="h6">
+                Télécharger ma photo de profil
+                </Typography>
+              </Paper>
+              </Box>
           </React.Fragment>
       </div>
-    </Box>
+    </Box>  
     </Container>
     )
 }
