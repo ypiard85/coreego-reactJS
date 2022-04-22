@@ -14,13 +14,14 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import {Link} from 'react-router-dom';
 import Logo from '../image/logo.png';
-import {auth, logOut} from '../backend/config';
+import {auth, logOut, db, storage} from '../backend/config';
 //import {useSelector} from "react-redux";
 import AuthContext from "../Contexts/Auth";
 import {Icon} from "@mui/material";
 import { AuthService } from '../Services/AuthService';
 import {UserService} from '../Services/UserService';
-
+import { ref, getDownloadURL, listAll } from "firebase/storage";
+import { collection, getDocs, where, query, doc } from "firebase/firestore";
 const pages = [
   {
   name: "Home",
@@ -50,7 +51,10 @@ const ResponsiveAppBar = () => {
   const [anchorElUser, setAnchorElUser] = useState(null);
   const {isAuthenticated} = useContext(AuthContext)
   const [profil , setProfil] = useState(false);
-  const [userID, setUSerID] = useState();
+  const [userID, setUserID] = useState();
+  const [user, setUser] = useState();
+  const [avatar,setAvatar] = useState();
+
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -68,17 +72,37 @@ const ResponsiveAppBar = () => {
   };
 
   useEffect(() => {
-    if(auth.currentUser){
-      setUSerID(auth.currentUser.uid)
-    }
-  }) 
-
-  useEffect(() => {
-    UserService.hasProfil(userID).then(res => {
-      setProfil(res)
-    }).catch(e => console.log(e))
+    setUserID(auth.currentUser ? auth.currentUser.uid: null)
   })
 
+  useEffect(() => {
+    UserService.hasProfil().then(res => {
+      setProfil(res)
+    }).catch(e => console.log(e))
+  }, [])
+
+  useEffect( () => {
+      UserService.getUSer().then(res => {
+        setUser(res)
+      })
+  }, [])
+
+  useEffect(() => {
+      const refs = ref(storage, "avatar");
+      if(user){
+      listAll(refs)
+        .then((res) => {
+            res.items.forEach((item) => {
+              if(item.name === user.avatar){
+                getDownloadURL(item).then((url) => {
+                  setAvatar(url);
+                });
+              }
+            });
+          })
+          .catch((erreur) => console.log(erreur));
+        }
+    });
 
   const userRoutes = [
     {
@@ -91,6 +115,8 @@ const ResponsiveAppBar = () => {
     }
   ];
 
+
+
   return (
     <div>
     <AppBar position="sticky" sx={{ top: '200px' }} >
@@ -102,8 +128,8 @@ const ResponsiveAppBar = () => {
             <Link to="/" >
               <img style={{ height: 'auto', width: '150px' }} src={Logo} alt={Logo} />
             </Link>
-          </Typography>
 
+          </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
               size="large"
@@ -200,7 +226,7 @@ const ResponsiveAppBar = () => {
               <Box sx={{ flexGrow: 0 }}>
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                  <Avatar alt="Remy Sharp" src={user ? avatar : ''} />
                 </IconButton>
               </Tooltip>
               <Menu

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState } from "react"
 import { storage, auth, db } from "../../backend/config.js";
-import { Container, Typography, TextField, Fab, Alert, AlertTitle, CircularProgress   } from "@mui/material"
+import { Container, Typography, TextField, Fab, Alert, AlertTitle, CircularProgress, LinearProgress } from "@mui/material"
 import {UserService} from '../../Services/UserService';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -38,40 +38,40 @@ const CreateProfil = () => {
     const [facebook, setFacebook] = useState("");
     const [twitter, setTwitter] = useState("");
     const [tiktok, setTiktok] = useState("");
-    const [file, setFile] = useState([]);
+    const [file, setFile] = useState();
     const [fileView, setFileView] = useState();
     const [loading, setLoading] = React.useState(false);
+    const [progress, setProgress] = useState(0);
+    const [messageValidation, setMessageValidation]  = useState("")
 
-    const [messageValidation, setMessageValidation]  = useState("") 
-  
 
     //Pseudo verif
     UserService.verifPseudo(pseudo).then(res => {
         setPseudoErrorMessage(res)
       })
-      
-      const handlePseudo = (event) => {
-        setPseudo(event.target.value)
-      }
-      
+
       const initSpace = (event) => {
         if(event.keyCode == 32){
           event.target.value = pseudo.replace(/\s/g, "")
           return true
         }
       }
-      
-      const [activeStep, setActiveStep] = React.useState(3);
-      
-    
+
+      const [activeStep, setActiveStep] = React.useState(0);
+
+
     const nextStep = () => {
       setActiveStep(activeStep + 1)
     }
-    
+
+    const handlePseudo = (event) => {
+      setPseudo(event.target.value)
+    }
+
     const handleDescription = (event) => {
       setDescription(event.target.value)
     }
-    
+
     const handleInstagram = (event) => {
       setInstagram(event.target.value)
     }
@@ -130,7 +130,7 @@ const CreateProfil = () => {
         valid: true,
       },
     ]
-    
+
     acordeons.forEach(a => {
       if(a.value !== ""){
         if(regextUrl.test(a.value)){
@@ -149,10 +149,9 @@ const CreateProfil = () => {
           return false
         }else{
           return true
-        }        
+        }
     }
-    //
-    
+
     const handleAvatar = (event) => {
         //setFile([])
         var preview = document.querySelector('#av');
@@ -167,38 +166,55 @@ const CreateProfil = () => {
           reader.readAsDataURL(fileimg)
         }
       }
+      const handleSubmit = () => {
 
-      const fetchData = () => {
-          let nb = Math.round(Math.random() * (300000 * 10)) + auth.currentUser.uid
+        const nb = Math.round(Math.random() * (300000 * 10)) + auth.currentUser.uid
               //Upload image
-              var storageRef = ref(storage,`/avatar/${nb}`);
-              uploadBytesResumable(storageRef, file);
-                
-              const userRef = doc(db, 'users', auth.currentUser.uid);
-              setDoc(userRef, {
-                pseudo: pseudo,
+              if(file){
+                var storageRef = ref(storage,`/avatar/${nb}`);
+                const u = uploadBytesResumable(storageRef, file);
+                u.on("state_changed", (snap) => {
+                  const prog = Math.round(
+                    (snap.bytesTransferred / snap.totalBytes) * 100
+                    );
+                    console.log(snap)
+                    setProgress(prog);
+                  });
+                }
+
+          const userRef = doc(db, 'users', auth.currentUser.uid);
+          const fetchData = setDoc(userRef, {
+                pseudo: pseudo.replace(/ /g, ""),
                 description: description,
-                avatar: nb,
+                avatar: file ? nb : null,
                 instagram: instagram,
                 facebook: facebook,
                 twitter: twitter,
                 tiktok: tiktok
               });
-      }
 
-      
-      const handleSubmit = () => {        
         if(pseudoErrorMessage != ""){
           if(etatValidation()){
             setLoading(true)
-            setTimeout(() => {
-              setLoading(false)
-              setMessageValidation("Votre profil à été créé avec Succès"); 
-              fetchData()             
-              }, 2000);             
-              setTimeout(() => {                
+            if(file && progress === 100){
+                console.log('progress up')
+                  setLoading(false)
+                  fetchData()
+                  setMessageValidation("Votre profil à été créé avec Succès");
+                  setTimeout(() => {
+                    window.location.href = "/profil/" + auth.currentUser.uid
+                  }, 3000)
+            }else{
+              setTimeout(() => {
+                setLoading(false)
+                setMessageValidation("Votre profil à été créé avec Succès");
+                fetchData()
+              }, 2000)
+              setTimeout(() => {
                 window.location.href = "/profil/" + auth.currentUser.uid
-              }, 3000)
+              }, 4000)
+            }
+
             }else{
               setActiveStep(2);
               alert("Merci de coriger vos URLs")
@@ -206,18 +222,18 @@ const CreateProfil = () => {
         }else{
           setActiveStep(0);
           alert(pseudoErrorMessage)
-        }   
+        }
       }
 
 
 
     return(
-        <Container>
+        <Container sx={{ my: 10 }}>
             <Alert severity="success" sx={{mt:10, display: messageValidation != "" ? 'blobk' : 'none' }}  >
             <AlertTitle>Success</AlertTitle>
               {messageValidation}
             </Alert>
-            <Box sx={{ width: '100%', maxWidth: "100%", mt: 10  }}>
+            <Box sx={{ width: '100%', maxWidth: "100%" }}>
             <Stepper activeStep={activeStep} sx={{flexWrap: 'wrap'}} >
                 {steps.map((label, index) => (
                 <Step key={label}>
@@ -231,7 +247,7 @@ const CreateProfil = () => {
           <React.Fragment>
             <Box sx={{ display: activeStep == 0 ? 'flex' : 'none', flexDirection: "column", width: '300px', maxWidth: "100%", m:'auto'  }} >
               <Typography sx={{mb:3}}>
-                Le pseudo ne peut pas être changé
+                Le pseudo ne peut pas être modifié
               </Typography>
                 <TextField
                 onChange={handlePseudo}
@@ -259,10 +275,10 @@ const CreateProfil = () => {
                 <Fab variant="contained" color="success" sx={{ m: 'auto', mt: 3 }} onClick={nextStep} >
                 <DoneIcon />
                 </Fab>
-            </Box>     
+            </Box>
             <Box style={{ width: '500px', maxWidth: "100%", m:'auto', display: activeStep === 2 ? 'block' : 'none' }} >
                 {acordeons.map((a,i) => {
-                  return (        
+                  return (
                     <Accordion  expanded={expanded === `panel${i}`} onChange={handleChange(`panel${i}`)} key={i}>
                       {a.value != "" ?
                       <AccordionSummary
@@ -270,8 +286,8 @@ const CreateProfil = () => {
                         aria-controls="panel1bh-content"
                         id="panel1bh-header"
                         sx={{ backgroundColor: a.valid ? ""  : "#CE293B"  }}
-                        >                                                
-                        <Typography sx={{ width: '33%', flexShrink: 0 }}>                                     
+                        >
+                        <Typography sx={{ width: '33%', flexShrink: 0 }}>
                         {a.icon}
                         </Typography>
                         <Typography sx={{ color: 'text.secondary' }}> {a.titre} </Typography>
@@ -280,9 +296,9 @@ const CreateProfil = () => {
                         <AccordionSummary
                         expandIcon={<ExpandMoreIcon />}
                         aria-controls="panel1bh-content"
-                        id="panel1bh-header"                        
+                        id="panel1bh-header"
                         >
-                        <Typography sx={{ width: '33%', flexShrink: 0 }}>                                     
+                        <Typography sx={{ width: '33%', flexShrink: 0 }}>
                         {a.icon}
                         </Typography>
                         <Typography sx={{ color: 'text.secondary' }}> {a.titre} </Typography>
@@ -298,27 +314,26 @@ const CreateProfil = () => {
                 <DoneIcon />
               </Fab>
               </Box>
-              <Box sx={{width: '500px', m: 'auto', maxWidth: '100%', position: 'relative', display: activeStep === 3 ? 'block' : 'none' }} >
-                <Paper elevation={8} sx={{py:5, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%'}}>
+
+
+              <Box sx={{width: '500px', m: 'auto', maxWidth: '100%', display: activeStep === 3 ? 'block' : 'none' }} >
+                <Paper elevation={8} sx={{py:5, display: 'flex',position: 'relative', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%'}}>
+                  <input onChange={handleAvatar} id="fileimg" accept='image/png, image/jpg, image/jpeg' type="file" style={{cursor: 'pointer', position: 'absolute', opacity: '0', top: 0, left: 0, right: 0, bottom:0 , height: '100%', width: '100%', display: "block"}} />
                 <img src={typeof file === undefined ? '' : "https://cdn-icons-png.flaticon.com/512/147/147142.png" } id="av" alt="" style={{width: '150px', height: '150px', borderRadius: '50%'}} />
-                  <input onChange={handleAvatar} id="fileimg" accept='image/png, image/jpg, image/jpeg' type="file" style={{cursor: 'pointer', position: 'absolute', opacity: '0', top: 0, left: 0, right: 0, bottom:0 , height: '100%', width: '100%'}} />
                   <Typography sx={{ p:2, mt:5, border: '3px dashed  #CE293B'}} variant="h6" component="h6">
                   Télécharger ma photo de profil
                   </Typography>
-                </Paper>                                
-              </Box>
-              <Box sx={{display: "flex", justifyContent: 'center', flexDirection: 'column', alignItems: 'center' , mt:5}}>   
-                {loading && (
-                  <CircularProgress
-                    size={68}                     
-                    sx={{mb:4, width: 'max-content', color: 'green'}}
-                  />
-                )}             
-                <Button variant="contained" sx={{width: 'max-content'}} disabled={loading ? true : false} onClick={handleSubmit}>Créer mon profil</Button>
+                </Paper>
+                <Box sx={{display: "flex", justifyContent: 'center', flexDirection: 'column', alignItems: 'center' , mt:5}}>
+                {loading && <CircularProgress sx={{ my: 2 }} color="secondary" /> }
+                {progress > 0 && <LinearProgress color="secondary" sx={{ width: '100%', my:2 }} variant="determinate" value={progress} /> }
+                  <Button variant="contained" sx={{width: 'max-content'}} disabled={loading ? true : false} onClick={handleSubmit}>Créer mon profil</Button>
                 </Box>
+              </Box>
+
           </React.Fragment>
       </div>
-    </Box>  
+    </Box>
     </Container>
     )
 }

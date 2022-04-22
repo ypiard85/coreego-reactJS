@@ -1,5 +1,5 @@
 import ResponsiveAppBar from './composants/Navbar';
-import React, {useContext, Redirect} from "react";
+import React, {useState} from "react";
 import { Routes, Route, Outlet } from "react-router-dom";
 import Home from './pages/Home';
 import Lieux from './pages/Lieux/Lieux';
@@ -20,14 +20,16 @@ function App() {
 
   const dispatch = useDispatch();
 
+  const auth = getAuth()
+
   useEffect(() => {
-    const auth = getAuth()
     onAuthStateChanged(auth, (currentUser) => {
       dispatch(authAction(currentUser));
     });
   }, [])
 
   const authState = useSelector((state) => state.authReducer)
+
 
   return (
     <AuthContext.Provider value={{ isAuthenticated:  Boolean(authState) }} >

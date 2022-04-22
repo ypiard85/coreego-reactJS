@@ -1,26 +1,28 @@
-import { db, storage } from "../backend/config.js";
+import { db, auth } from "../backend/config.js";
 //import { ref, getDownloadURL } from "firebase/storage";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, where, query } from "firebase/firestore";
 
 const usercol = collection(db, 'users');
 
 export const UserService = {
-    hasProfil : async (id) => {
+    hasProfil : async () => {
         try {
         const userpseudo = []
-        var haveAcount = false   
+        var haveAcount = false
            await getDocs(usercol).then((snap) => {
                 snap.forEach(docs => {
-                    if(docs.id === id){
-                       userpseudo.push(docs.id)
-                       if(userpseudo.length === 1){
-                            haveAcount = true
-                        }else{
-                            haveAcount = false
-                        }   
-                    }                    
-                })              
-          });       
+                    if(auth.currentUser){
+                        if(docs.id === auth.currentUser.uid){
+                            userpseudo.push(docs.id)
+                            if(userpseudo.length === 1){
+                                haveAcount = true
+                            }else{
+                                haveAcount = false
+                            }
+                        }
+                    }
+                })
+          });
 
           return haveAcount;
 
@@ -39,7 +41,7 @@ export const UserService = {
                 }else if(docs.data().pseudo == p){
                     message = "Le pseudo " + p + " existe déjâ"
                 }else{
-                   message = null 
+                   message = null
                 }
                 })
           });
@@ -47,5 +49,26 @@ export const UserService = {
         } catch (error) {
             console.log(error)
         }
+    },
+
+    getUSer: async () => {
+        try {
+            var users;
+                    await getDocs(usercol).then((snap) => {
+                        snap.forEach(docs => {
+                            if(auth.currentUser){
+                                if(docs.id === auth.currentUser.uid){
+                                    users = docs.data()
+                                }
+                            }
+                        })
+                    });
+
+
+          return users
+        } catch (error) {
+            console.log(error)
+        }
     }
+
 }
