@@ -3,6 +3,7 @@ import { db, storage } from "../backend/config.js";
 import { collection, getDocs } from "firebase/firestore";
 
 
+const col = collection(db, "lieux");
 export const LieuService = {
   getAll: async () => {
     try {
@@ -19,4 +20,5 @@ export const LieuService = {
       console.log(error);
     }
   },
+
 };

@@ -38,16 +38,17 @@ const SingleLieu = () => {
         setCats(res)
       }).catch(e => console.log(e))
     }, []);
-    console.log(cats)
+
   //récupération du paramètre de l'url
-  let topicId = useParams();
+  let param = useParams();
   //Récupération de la single lieux
+
   useEffect(() => {
     const lieuxCollection = collection(db, "lieux");
     getDocs(lieuxCollection)
       .then((snap) => {
         snap.forEach((doc) => {
-          if (doc.id === topicId.id) {
+          if (doc.id === param.id) {
             setLieux((arr) => [...arr, doc.data()]);
           }
         });

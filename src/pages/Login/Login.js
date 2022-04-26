@@ -1,4 +1,4 @@
-import {useState, useRef, useEffect} from "react";
+import {useState, useRef} from "react";
 import { Box, Container } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
@@ -6,7 +6,10 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
+
 import {AuthService} from '../../Services/AuthService';
+import {auth} from '../../backend/config';
+import {signInWithEmailAndPassword} from 'firebase/auth'
 
 function Login() {
   const email = useRef(null);
@@ -21,7 +24,8 @@ function Login() {
   const handleSubmit = (event) => {
     event.preventDefault();
     setIsLoad(true);
-    AuthService.signInWithEmailAndPassword(
+    signInWithEmailAndPassword(
+      auth,
       email.current.value,
       password.current.value
     ).then(res => {

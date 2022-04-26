@@ -1,19 +1,17 @@
+import {useRef} from 'react'
 import { Box, Container } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import TextField from '@mui/material/TextField';
 import Typography from "@mui/material/Typography";
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
-import {auth, logOut} from '../../backend/config';
-import { createUserWithEmailAndPassword, sendEmailVerification } from "@firebase/auth";
-import { useEffect, useRef, useState } from "react";
+import {auth} from '../../backend/config';
+import { createUserWithEmailAndPassword, /*sendEmailVerification*/ } from "@firebase/auth";
+import { useState } from "react";
 import Alert from '@mui/material/Alert';
-import {AuthService} from '../../Services/AuthService'
 
 
 function Register() {
-
-
 
 
   const email = useRef(null);

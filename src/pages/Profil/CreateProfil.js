@@ -17,8 +17,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import TwitterIcon from '@mui/icons-material/Twitter';
-import { doc, setDoc, collection } from "firebase/firestore";
-import { getStorage, ref, uploadBytesResumable } from "firebase/storage";
+import { doc, setDoc } from "firebase/firestore";
+import { ref, uploadBytesResumable } from "firebase/storage";
 
 
 const steps = [
@@ -39,7 +39,7 @@ const CreateProfil = () => {
     const [twitter, setTwitter] = useState("");
     const [tiktok, setTiktok] = useState("");
     const [file, setFile] = useState();
-    const [fileView, setFileView] = useState();
+    const [fileView, setFileView] = useState("");
     const [loading, setLoading] = React.useState(false);
     const [progress, setProgress] = useState(0);
     const [messageValidation, setMessageValidation]  = useState("")

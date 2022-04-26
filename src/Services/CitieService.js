@@ -18,6 +18,6 @@ export const CitieService = {
         } catch (error) {
             console.log(error)
         }
+    },
 
-    }
 }

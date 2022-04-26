@@ -1,5 +1,5 @@
 import ResponsiveAppBar from './composants/Navbar';
-import React, {useState} from "react";
+import React from "react";
 import { Routes, Route, Outlet } from "react-router-dom";
 import Home from './pages/Home';
 import Lieux from './pages/Lieux/Lieux';
@@ -13,6 +13,7 @@ import {useEffect} from "react";
 import { onAuthStateChanged, getAuth } from "@firebase/auth";
 import {authAction} from "./reducer/authReducer";
 import ProtectedRoute from './Services/PrivateRoute'
+import HasProfilPrivateRoute from './Services/HasProfilPrivateRoute'
 import CreateProfil from './pages/Profil/CreateProfil'
 import SingleProfil from './pages/Profil/SingleProfil'
 
@@ -41,7 +42,7 @@ function App() {
               <Route path="/ajouter-un-lieu" element={<ProtectedRoute><AddLieu /></ProtectedRoute>} />
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/profil/:pseudo" element={<ProtectedRoute><SingleProfil /></ProtectedRoute>} />
+              <Route path="/profil/:id" element={<ProtectedRoute><SingleProfil /></ProtectedRoute>} />
               <Route path="/create-profil/:id" element={<ProtectedRoute><CreateProfil /></ProtectedRoute>} />
               <Route index path="/" element={<Home />} />
           </Routes>

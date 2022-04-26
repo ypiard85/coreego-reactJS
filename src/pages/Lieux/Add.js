@@ -16,20 +16,18 @@ import { CategorieService } from "../../Services/CategorieService";
 import { CitieService } from "../../Services/CitieService";
 import Alert from "@mui/material/Alert";
 import { getAuth } from "firebase/auth";
-import { db, storage } from "../../backend/config.js";
+import { db } from "../../backend/config.js";
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
 //import { ref, getDownloadURL } from "firebase/storage";
 import { doc, setDoc, collection, GeoPoint } from "firebase/firestore";
 import { getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import LinearProgress from "@mui/material/LinearProgress";
-
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import Avatar from "@mui/material/Avatar";
-import Grid from "@mui/material/Grid";
 import FolderIcon from "@mui/icons-material/Folder";
 import DeleteIcon from "@mui/icons-material/Delete";
 

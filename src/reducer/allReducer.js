@@ -1,9 +1,9 @@
 import {isAuthenticated} from './authReducer';
-import {profil} from './profilReducer';
+import {hasProfil} from './profilReducer';
 import {combineReducers} from 'redux';
 
 
 export const allReducers = combineReducers({
     authReducer: isAuthenticated,
-    profilReducer: profil
+    profilReducer: hasProfil
 })
