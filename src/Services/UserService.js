@@ -1,5 +1,5 @@
-import { db, auth } from "../backend/config.js";
-//import { ref, getDownloadURL } from "firebase/storage";
+import { db, auth, storage } from "../backend/config.js";
+import { ref, getDownloadURL, listAll } from "firebase/storage";
 import { collection, getDocs, where, query } from "firebase/firestore";
 
 const usercol = collection(db, "users");
@@ -68,4 +68,22 @@ export const UserService = {
       console.log(error);
     }
   },
+
+  getOneUser: async (id) => {
+    try {
+      var user;
+      await getDocs(usercol).then((snap) => {
+        snap.forEach((doc) => {
+          if (doc.id === id) {
+            user = { ...doc.data(), id: doc.id };
+          }
+        });
+      });
+      return user;
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+
 };

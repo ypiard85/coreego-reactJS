@@ -9,7 +9,7 @@ import AddLocationIcon from "@mui/icons-material/AddLocation";
 import LoadingImg from '../images/caree_loading.png';
 import Grid from "@mui/material/Grid";
 import {StorageService} from '../Services/StorageService';
-
+import Skeletons from './Skeleton';
 function CardLieux(props) {
 
     const { lieu, cats, citie, images } = props;
@@ -37,8 +37,8 @@ function CardLieux(props) {
       )
     }
 
-    return (
-      <Grid item md={4} xs={6}>
+    const Onecard = () => {
+      return(
         <Card className="card__lieux">
         <Typography
       varaint="p"
@@ -81,7 +81,13 @@ function CardLieux(props) {
           </CardActionArea>
           <Link to={"/lieu/" + lieu.id} className="link__card"></Link>
         </Card>
-      </Grid>
+      )
+    }
+
+    return (
+      <>
+       { url ? <Onecard /> : <Skeletons /> }
+      </>
       );
     }
 

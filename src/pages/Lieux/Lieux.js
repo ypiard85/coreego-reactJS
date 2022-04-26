@@ -28,7 +28,6 @@ function List() {
       setLieux(res)
     }).catch(e => console.log(e))
   }, [])
-
   //Get cities
   useEffect(() => {
     CitieService.getAll().then(res => {
@@ -47,21 +46,23 @@ function List() {
 
 
   return (
-    <>
     <Grid container spacing={2}>
       {lieux.filter(val => {
-       return val.title.toLowerCase().includes(input.toLowerCase())
+        return val.title.toLowerCase().includes(input.toLowerCase())
       }).map((val, index) => {
-        return (<CardLieux
+        return (
+          <Grid item md={4} xs={6}>
+        <CardLieux
         lieu={val}
         key={index}
         citie={cities}
         images={val.images[0]}
         cats={cats}
-        />)
+        />
+        </Grid>
+        )
       })}
     </Grid>
-    </>
   );
 }
 

@@ -21,4 +21,23 @@ export const LieuService = {
     }
   },
 
+  getOneLieu : async (id) => {
+    try {
+      const lieu = []
+     await getDocs(col)
+      .then((snap) => {
+        snap.forEach((doc) => {
+          if (doc.id === id) {
+            lieu.push(doc.data());
+          }
+        });
+      }).catch((erreur) => console.log(erreur));
+
+      return lieu
+
+    } catch (error) {
+
+    }
+  }
+
 };

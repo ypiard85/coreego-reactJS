@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react'
 import { useParams } from "react-router-dom";
-import { Container, Typography, Avatar  } from "@mui/material"
+import { Container, Typography, Avatar, AppBar, Tabs, Tab, useTheme } from "@mui/material"
+import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db, storage} from "../../backend/config";
@@ -51,25 +52,20 @@ const SingleProfil = () => {
         <Box sx={{ mt:5 }}>
             <Container>
                 <UserInfo user={user} avatar={avatar} />
+                <BasicTabs />
             </Container>
         </Box>
     )
 }
 
 function UserInfo(props){
-
     const {user, avatar} = props
-
-
     return(
         <Box>
             <Box sx={{ display: 'flex', alignItems: "center" }}>
                 {avatar ?
-                <Avatar alt="Remy Sharp" src={avatar} sx={{ width: 60, height: 60, mr:3 }} />
-                :
-                <CustomizedProgressBars />
+                <Avatar alt="Remy Sharp" src={avatar} sx={{ width: 60, height: 60, mr:3 }} /> : <CustomizedProgressBars />
                 }
-
                 <Typography variant="h5" componant="h1" >{user && user.pseudo} </Typography>
             </Box>
             <Box sx={{ my:5 }}>
@@ -80,5 +76,60 @@ function UserInfo(props){
         </Box>
     )
 }
+
+function TabPanel(props) {
+    const { children, value, index, ...other } = props;
+
+    return (
+      <div
+        role="tabpanel"
+        hidden={value !== index}
+        id={`simple-tabpanel-${index}`}
+        aria-labelledby={`simple-tab-${index}`}
+        {...other}
+      >
+        {value === index && (
+          <Box sx={{ p: 3 }}>
+            <Typography>{children}</Typography>
+          </Box>
+        )}
+      </div>
+    );
+  }
+
+  TabPanel.propTypes = {
+    children: PropTypes.node,
+    index: PropTypes.number.isRequired,
+    value: PropTypes.number.isRequired,
+  };
+
+  function BasicTabs() {
+    const [value, setValue] = React.useState(0);
+
+    const handleChange = (event, newValue) => {
+      setValue(newValue);
+    };
+
+    return (
+      <Box sx={{ width: '100%' }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+            <Tab label="Item Oness" />
+            <Tab label="Item Two"/>
+            <Tab label="Item Three"/>
+          </Tabs>
+        </Box>
+        <TabPanel value={value} index={0}>
+          azerrzer
+        </TabPanel>
+        <TabPanel value={value} index={1}>
+          Item Two
+        </TabPanel>
+        <TabPanel value={value} index={2}>
+          Item Three
+        </TabPanel>
+      </Box>
+    );
+  }
 
 export default SingleProfil
