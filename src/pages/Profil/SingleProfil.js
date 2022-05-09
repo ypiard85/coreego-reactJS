@@ -1,11 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Container, Typography, Avatar, Tabs, Tab } from "@mui/material";
+import { Container, Typography, Avatar, Tabs, Tab, Alert } from "@mui/material";
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
-import { db, storage } from "../../backend/config";
-import { ref, getDownloadURL, listAll } from "firebase/storage";
+import {
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  updateDoc,
+  doc,
+} from "firebase/firestore";
+import { auth, db, storage } from "../../backend/config";
+import {
+  ref,
+  getDownloadURL,
+  listAll,
+  uploadBytesResumable,
+  getStorage,
+  deleteObject,
+} from "firebase/storage";
 import CustomizedProgressBars from "../../composants/FacebookCircularProgress";
 import { LieuService } from "../../Services/LieuService";
 import Grid from "@mui/material/Grid";
@@ -14,12 +28,28 @@ import CardLieux from "../../composants/CardLieux";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import InstagramIcon from "@mui/icons-material/Instagram";
+import { UserService } from "../../Services/UserService";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import Fab from "@mui/material/Fab";
+import DoneIcon from "@mui/icons-material/Done";
+import CloseIcon from "@mui/icons-material/Close";
+
+function reduce(state = false, action) {
+  switch (action.type) {
+    case "IS_AUTH_PROFIL":
+      return (state = true);
+      break;
+    default:
+      return state;
+  }
+}
 
 const SingleProfil = () => {
   const params = useParams();
   const [lieux, setLieux] = useState([]);
   const [user, setUser] = useState();
   const [avatar, setAvatar] = useState();
+  const [state, dispatch] = useReducer(reduce);
 
   const getLieux = () => {
     LieuService.getLieuxFromUSer(params.id)
@@ -32,6 +62,14 @@ const SingleProfil = () => {
   useEffect(() => {
     getLieux();
   }, []);
+
+  useEffect(() => {
+    if (auth.currentUser) {
+      if (UserService.singleProfilIsAuthProfil(params.id)) {
+        dispatch({ type: "IS_AUTH_PROFIL" });
+      }
+    }
+  });
 
   useEffect(() => {
     const profilCol = collection(db, "users");
@@ -69,7 +107,7 @@ const SingleProfil = () => {
   return (
     <Box sx={{ mt: 5 }}>
       <Container>
-        <UserInfo user={user} avatar={avatar} />
+        <UserInfo user={user} avatar={avatar} authprofil={state} />
         <BasicTabs lieux={lieux} />
       </Container>
     </Box>
@@ -77,7 +115,59 @@ const SingleProfil = () => {
 };
 
 function UserInfo(props) {
-  const { user, avatar } = props;
+  const { user, avatar, authprofil } = props;
+
+  const [avatarUpdate, setAvatarUpdate] = useState();
+  const [file, setFile] = useState();
+  const [fileView, setFileView] = useState();
+  const [message, setMessage] = useState(null);
+
+  const handleAvatar = (event) => {
+    var preview = document.querySelector("#av");
+    var fileimg = document.getElementById("fileimg").files[0];
+    setFile(event.target.files[0]);
+    setFileView(preview);
+    var reader = new FileReader();
+    reader.addEventListener(
+      "load",
+      function () {
+        preview.src = reader.result;
+      },
+      false
+    );
+
+    if (fileimg) {
+      reader.readAsDataURL(fileimg);
+    }
+  };
+
+  console.log(file);
+
+  const resetFile = () => {
+    setFile(null);
+  };
+
+  const updateAvatar = () => {
+    const nb = Math.round(Math.random() * (300000 * 10)) + auth.currentUser.uid;
+    //Upload image
+    const thisavatar = ref(storage, `avatar/${user.avatar}`);
+
+    if (file) {
+      deleteObject(thisavatar).then((res) => {
+        console.log(res);
+      });
+      var storageRef = ref(storage, `/avatar/${nb}`);
+      uploadBytesResumable(storageRef, file);
+      const docs = doc(db, "users", auth.currentUser.uid);
+      updateDoc(docs, {
+        avatar: nb,
+      });
+      setMessage("Votre photo à bien été mis à jour");
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+    }
+  };
 
   const sns = [
     {
@@ -111,16 +201,81 @@ function UserInfo(props) {
 
   return (
     <Box>
+      {message && (
+        <Alert severity="success" sx={{ mb: 3 }}>
+          {message}
+        </Alert>
+      )}
       <Box sx={{ display: "flex", alignItems: "center" }}>
         {avatar ? (
-          <Avatar
-            alt="Remy Sharp"
-            src={avatar}
-            sx={{ width: 60, height: 60, mr: 3 }}
-          />
+          <React.Fragment>
+            <Box sx={{ position: "relative", width: 60, height: 60, mr: 3 }}>
+              <img
+                alt="Remy Sharp"
+                id="av"
+                src={file ? "" : avatar}
+                style={{
+                  width: 60,
+                  height: 60,
+                  mr: 3,
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  objectPosition: "center",
+                }}
+              />
+
+              {authprofil && (
+                <Typography
+                  variant="p"
+                  sx={{
+                    position: "absolute",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    bottom: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "50%",
+                    background: "rgba(82, 82, 82, 0.555)",
+                    borderRadius: "0  0 100px 100px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <PhotoCameraIcon sx={{ color: "white" }} />
+                  <input
+                    id="fileimg"
+                    accept="image/png, image/jpg, image/jpeg"
+                    onChange={handleAvatar}
+                    type="file"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      position: "absolute",
+                      left: 0,
+                      right: 0,
+                      top: 0,
+                      bottom: 0,
+                      opacity: 0,
+                    }}
+                  />
+                </Typography>
+              )}
+              {file && (
+                <Box sx={{ display: "inline-flex" }}>
+                  <Fab color="success" aria-label="add" onClick={updateAvatar}>
+                    <DoneIcon />
+                  </Fab>
+                  <Fab color="error" aria-label="add" onClick={resetFile}>
+                    <CloseIcon />
+                  </Fab>
+                </Box>
+              )}
+            </Box>
+          </React.Fragment>
         ) : (
           <CustomizedProgressBars />
         )}
+
         <Typography variant="h5" componant="h1">
           {user && user.pseudo}
         </Typography>
@@ -143,7 +298,7 @@ function Sns(props) {
   const { sns } = props;
 
   return (
-    <Typography variant="div" component="div">
+    <Typography variant="div" component="div" sx={{ display: "block" }}>
       {sns.map((s, index) => {
         return (
           s.lien != "" && (

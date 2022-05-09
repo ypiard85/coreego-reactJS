@@ -1,6 +1,7 @@
 import { db, auth, storage } from "../backend/config.js";
 import { ref, getDownloadURL, listAll } from "firebase/storage";
 import { collection, getDocs, where, query } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 const usercol = collection(db, "users");
 
@@ -85,5 +86,11 @@ export const UserService = {
     }
   },
 
-
+  singleProfilIsAuthProfil: (id) => {
+    var ownProfil;
+    if (auth.currentUser) {
+      auth.currentUser.uid === id ? (ownProfil = true) : (ownProfil = false);
+    }
+    return ownProfil;
+  },
 };
